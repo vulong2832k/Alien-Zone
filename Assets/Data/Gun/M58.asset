@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb710d438007f6458c12882c919dde9, type: 3}
+  m_Name: M58
+  m_EditorClassIdentifier: 
+  _name: M58
+  _damage: 45
+  _ammo: 12
+  _reserveAmmo: 12
+  _maxAmmoReserve: 240
+  _fireSpeed: 0.3
+  _reload: 2
+  _gunPrefab: {fileID: 4176848852917684107, guid: 7f7fa17ad15cc024d9edc9c69cded0e1, type: 3}
+  _requiredAmmo: {fileID: 11400000, guid: e100b4a7c8831d849982c1e90b8e4405, type: 2}
+  _quantityPerShoot: 0
+  _speardAngle: 0
+  _gunType: 8
+  _bulletType: 2
+  _positionOffset: {x: 0.24, y: 0, z: -0.196}
+  _rotationOffset: {x: 0, y: 0, z: 0}
+  _scaleOffset: {x: 1, y: 1, z: 1}

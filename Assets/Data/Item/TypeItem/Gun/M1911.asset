@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
+  m_Name: M1911
+  m_EditorClassIdentifier: 
+  itemName: M1911
+  icon: {fileID: 21300000, guid: 85ecd5be1e1908d4ebdeca4a7463bc8f, type: 3}
+  itemType: 0
+  worldPrefab: {fileID: 2960194161316673234, guid: 62cec919c553a3c42a14c374d1cea85d, type: 3}
+  isStackable: 0
+  maxStack: 1
+  gunAttributes: {fileID: 11400000, guid: 42edc53b4238c4a4cbb575125f5ccf86, type: 2}

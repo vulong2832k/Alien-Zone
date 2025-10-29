@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
+  m_Name: M9A3
+  m_EditorClassIdentifier: 
+  itemName: M9A3
+  icon: {fileID: 21300000, guid: ed1c4869dca6add4aab2646993bd4bc7, type: 3}
+  itemType: 0
+  worldPrefab: {fileID: 6048756005819769318, guid: 271261510c3634e40a41cd0f30021ea3, type: 3}
+  isStackable: 0
+  maxStack: 1
+  gunAttributes: {fileID: 11400000, guid: 1f9c4b2818a3aeb448b79f3c2e08de6e, type: 2}

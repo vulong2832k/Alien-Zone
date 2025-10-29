@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb710d438007f6458c12882c919dde9, type: 3}
+  m_Name: M9A3
+  m_EditorClassIdentifier: 
+  _name: M9A3
+  _damage: 40
+  _ammo: 20
+  _reserveAmmo: 20
+  _maxAmmoReserve: 200
+  _fireSpeed: 0.25
+  _reload: 1.3
+  _gunPrefab: {fileID: 411184855042100437, guid: 4a799544de6b6e1479184581fa2c069a, type: 3}
+  _requiredAmmo: {fileID: 11400000, guid: e100b4a7c8831d849982c1e90b8e4405, type: 2}
+  _quantityPerShoot: 0
+  _speardAngle: 0
+  _gunType: 1
+  _bulletType: 0
+  _positionOffset: {x: 0.24, y: 0, z: 0.034}
+  _rotationOffset: {x: 0, y: 0, z: 0}
+  _scaleOffset: {x: 1, y: 1, z: 1}

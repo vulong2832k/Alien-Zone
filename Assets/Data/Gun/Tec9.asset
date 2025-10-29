@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb710d438007f6458c12882c919dde9, type: 3}
+  m_Name: Tec9
+  m_EditorClassIdentifier: 
+  _name: Tec9
+  _damage: 5
+  _ammo: 40
+  _reserveAmmo: 40
+  _maxAmmoReserve: 800
+  _fireSpeed: 0.05
+  _reload: 1
+  _gunPrefab: {fileID: 2283781999354061732, guid: e70d65cd3a8c506489fd4bf08256e978, type: 3}
+  _requiredAmmo: {fileID: 11400000, guid: e100b4a7c8831d849982c1e90b8e4405, type: 2}
+  _quantityPerShoot: 0
+  _speardAngle: 0
+  _gunType: 5
+  _bulletType: 0
+  _positionOffset: {x: 0.24, y: -0.032, z: -0.064}
+  _rotationOffset: {x: 0, y: 0, z: 0}
+  _scaleOffset: {x: 1, y: 1, z: 1}

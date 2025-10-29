@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb710d438007f6458c12882c919dde9, type: 3}
+  m_Name: Glock18
+  m_EditorClassIdentifier: 
+  _name: Glock18
+  _damage: 8
+  _ammo: 20
+  _reserveAmmo: 30
+  _maxAmmoReserve: 300
+  _fireSpeed: 0.2
+  _reload: 1.5
+  _gunPrefab: {fileID: 757893086740938957, guid: 0256e2029fde2d449b06cad89027612a, type: 3}
+  _requiredAmmo: {fileID: 11400000, guid: e100b4a7c8831d849982c1e90b8e4405, type: 2}
+  _quantityPerShoot: 0
+  _speardAngle: 0
+  _gunType: 1
+  _bulletType: 0
+  _positionOffset: {x: 0.24, y: 0, z: 0.05}
+  _rotationOffset: {x: 0, y: 0, z: 0}
+  _scaleOffset: {x: 1, y: 1, z: 1}
