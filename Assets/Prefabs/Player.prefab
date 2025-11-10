@@ -359,8 +359,8 @@ MonoBehaviour:
   _healRecoveryBasic: 0
   _healRecoveryBonus: 0
   _healRecoveryTotal: 0
-  _moveSpeed: 5
-  _jumpForce: 7
+  _moveSpeed: 10
+  _jumpForce: 5
   _groundLayer:
     serializedVersion: 2
     m_Bits: 896

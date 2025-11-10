@@ -41,7 +41,6 @@ public class SpawnZone : MonoBehaviour
         SpawnEnemies();
         hasTriggered = true;
     }
-
     private void SpawnEnemies()
     {
         IsCleared = false;
@@ -79,26 +78,26 @@ public class SpawnZone : MonoBehaviour
             IsCleared = true;
         }
     }
-
     private Vector3 GetRandomPointInArea()
     {
         Bounds bounds = spawnArea.GetComponent<BoxCollider>().bounds;
 
         float x = Random.Range(bounds.min.x, bounds.max.x);
         float z = Random.Range(bounds.min.z, bounds.max.z);
-        float y = bounds.max.y + 5f;
+        float y = bounds.center.y + 20f;
 
         Vector3 spawnPos = new Vector3(x, y, z);
 
         if (Physics.Raycast(spawnPos, Vector3.down, out RaycastHit hit, Mathf.Infinity))
         {
-            return hit.point;
+            if (hit.collider.CompareTag("Ground"))
+            {
+                return hit.point;
+            }
         }
 
         return spawnPos;
     }
-
-
     private void OnDrawGizmosSelected()
     {
         if (spawnArea != null)
