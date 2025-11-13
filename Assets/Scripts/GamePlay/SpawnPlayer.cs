@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class SpawnPlayer : MonoBehaviour
@@ -12,11 +13,22 @@ public class SpawnPlayer : MonoBehaviour
     {
         Spawn();
     }
+
     private void Spawn()
     {
         if (_spawnPos == null || _playerPrefab == null) return;
 
         var player = Instantiate(_playerPrefab, _spawnPos.position, Quaternion.identity);
+
+        var cineCam = FindAnyObjectByType<CinemachineCamera>();
+        if (cineCam != null)
+        {
+            var cameraTarget = player.transform.Find("Head/CameraTarget");
+            if (cameraTarget != null)
+            {
+                cineCam.Follow = cameraTarget;
+            }
+        }
 
         var inventory = player.GetComponent<InventorySystem>();
         PlayerInventory = inventory;

@@ -19,6 +19,12 @@ public enum BulletType
     Missile,
     Grenade
 }
+public enum GunStateType
+{
+    Global,
+    Pistol,
+    Rifle,
+}
 
 [CreateAssetMenu(fileName = "GunAttributes", menuName = "GunSO/GunAttributes")]
 public class GunAttributes : ScriptableObject
@@ -70,4 +76,25 @@ public class GunAttributes : ScriptableObject
     public Vector3 PositionOffset => _positionOffset;
     public Vector3 RotationOffset => _rotationOffset;
     public Vector3 ScaleOffset => _scaleOffset;
+
+    public GunStateType StateType
+    {
+        get
+        {
+            switch (_gunType)
+            {
+                case GunType.Pistol:
+                    return GunStateType.Pistol;
+                case GunType.Rifle:
+                case GunType.Shotgun:
+                case GunType.SMG:
+                case GunType.MG:
+                case GunType.Sniper:
+                case GunType.RPG:
+                    return GunStateType.Rifle;
+                default:
+                    return GunStateType.Global;
+            }
+        }
+    }
 }

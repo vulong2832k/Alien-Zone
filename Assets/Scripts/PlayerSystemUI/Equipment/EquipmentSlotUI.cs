@@ -90,6 +90,12 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             if (_weaponSwitching != null)
             {
                 _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
+
+                var playerController = FindAnyObjectByType<PlayerController>();
+                if (playerController != null)
+                {
+                    playerController.OnWeaponEquipped(item.gunAttributes);
+                }
             }
         }
     }

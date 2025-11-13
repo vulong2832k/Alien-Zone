@@ -50,14 +50,19 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private int _xpToNextLevel = 100;
     [SerializeField] private float _xpGrowthRate = 1.2f;
 
-    [Header("Slot Gun: ")]
+    [Header("Gun: ")]
     [SerializeField] private WeaponSlots[] _weaponSlots;
+
+    private GunStateType _currentGunStateType = GunStateType.Global; 
 
     [Header("References:")]
     [SerializeField] private Transform _cameraTransform;
     public Transform CameraTransform => _cameraTransform;
     private WeaponSwitching _weaponSwitching;
+    private float _turnSmoothVelocity;
 
+    [Header("Coroutine: ")]
+    private Coroutine _healRoutine;
 
     [Header("States: ")]
     public PlayerStateMachine StateMachine { get; private set; }
@@ -80,6 +85,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     void Start()
     {
+        _healRoutine = StartCoroutine(HealOverTime());
         InitStateMachine();
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
         OnXPChanged?.Invoke(_currentXP, _xpToNextLevel, _currentLevel);
@@ -93,10 +99,14 @@ public class PlayerController : MonoBehaviour, IDamageable
         HandleKeyboardInput();
 
         if (Input.GetKeyDown(KeyCode.K)) AddXP(25);
+
+        Debug.Log(IsGrounded());
+
+        PlayerMovement();
     }
     void FixedUpdate()
     {
-        PlayerMovement();
+        
     }
     private void InitAttributes()
     {
@@ -106,14 +116,16 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         _currentHP = _maxHP;
 
-        _cameraTransform = transform.GetChild(0);
+        if (_cameraTransform == null)
+            _cameraTransform = Camera.main.transform;
+
         Cursor.lockState = CursorLockMode.Locked;
 
         if (_groundCheck == null)
         {
             GameObject check = new GameObject("GroundCheck");
             check.transform.SetParent(transform);
-            check.transform.localPosition = Vector3.down * 0.85f;
+            check.transform.localPosition = Vector3.down;
             _groundCheck = check.transform;
         }
 
@@ -138,14 +150,10 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     private void GetInputValue()
     {
-        //Move
         MoveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        //Walking
 
-        //Crouch
         IsCrouching = Input.GetKey(KeyCode.LeftControl);
 
-        //Jump
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
             PlayerRb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
@@ -172,10 +180,21 @@ public class PlayerController : MonoBehaviour, IDamageable
         forward.Normalize();
         right.Normalize();
 
-        Vector3 moveDirection = (forward * MoveInput.y + right * MoveInput.x).normalized;
-        Vector3 newVelocity = moveDirection * MoveSpeed;
-        newVelocity.y = PlayerRb.linearVelocity.y;
-        PlayerRb.linearVelocity = newVelocity;
+        Vector3 move = forward * MoveInput.y + right * MoveInput.x;
+        float sqrMag = move.sqrMagnitude;
+
+        if (sqrMag > 0.0001f)
+        {
+            Vector3 targetVel = move.normalized * MoveSpeed;
+            PlayerRb.linearVelocity = new Vector3(targetVel.x, PlayerRb.linearVelocity.y, targetVel.z);
+
+            Quaternion targetRotation = Quaternion.LookRotation(move);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        }
+        else
+        {
+            PlayerRb.linearVelocity = new Vector3(0f, PlayerRb.linearVelocity.y, 0f);
+        }
     }
     public void TweenCrouch(bool isCrouching)
     {
@@ -190,6 +209,17 @@ public class PlayerController : MonoBehaviour, IDamageable
     {
         return Physics.CheckSphere(_groundCheck.position, _groundCheckRadius, _groundLayer);
     }
+    public void OnWeaponEquipped(GunAttributes gun)
+    {
+        if (gun == null)
+        {
+            _currentGunStateType = GunStateType.Global;
+            return;
+        }
+        _currentGunStateType = gun.StateType;
+    }
+    public GunStateType GetCurrentGunStateType() => _currentGunStateType;
+
     public void TakeDamage(int damage)
     {
         _currentHP -= damage;
@@ -199,6 +229,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         if (_currentHP <= 0)
         {
+            if (_healRoutine != null) StopCoroutine(_healRoutine);
             gameObject.SetActive(false);
         }
     }
