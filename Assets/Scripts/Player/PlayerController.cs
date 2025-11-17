@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private Transform _groundCheck;
     [SerializeField] private float _groundCheckRadius = 0.3f;
 
+    public bool JumpPressed { get; private set; }
+
     public float JumpForce => _jumpForce;
 
     private bool _isGrounded;
@@ -58,8 +60,12 @@ public class PlayerController : MonoBehaviour, IDamageable
     [Header("References:")]
     [SerializeField] private Transform _cameraTransform;
     public Transform CameraTransform => _cameraTransform;
+
     private WeaponSwitching _weaponSwitching;
+
     private float _turnSmoothVelocity;
+
+    private GunStateMachine _gunStateMachine;
 
     [Header("Coroutine: ")]
     private Coroutine _healRoutine;
@@ -70,8 +76,13 @@ public class PlayerController : MonoBehaviour, IDamageable
     public PlayerMoveState MoveState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
 
+    public PlayerJumpState JumpState { get; private set; }
+
     [Header("Componenets: ")]
     public Rigidbody PlayerRb { get; private set; }
+
+    private Animator _animator;
+    public Animator Animator => _animator;
 
     //Event
     public event Action<int, int> OnHealthChanged;
@@ -94,13 +105,12 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void Update()
     {
         GetInputValue();
-        StateMachine.CurrentState.LogicUpdate();
+        StateMachine.CurrentState.HandleInput();
+        StateMachine.CurrentState.Update();
 
         HandleKeyboardInput();
 
         if (Input.GetKeyDown(KeyCode.K)) AddXP(25);
-
-        Debug.Log(IsGrounded());
 
         PlayerMovement();
     }
@@ -138,6 +148,8 @@ public class PlayerController : MonoBehaviour, IDamageable
         _body = transform.GetChild(1);
 
         _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
+
+        _animator = GetComponentInChildren<Animator>();
     }
     private void InitStateMachine()
     {
@@ -145,6 +157,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         IdleState = new PlayerIdleState(this, StateMachine);
         MoveState = new PlayerMoveState(this, StateMachine);
         CrouchState = new PlayerCrouchState(this, StateMachine);
+        JumpState = new PlayerJumpState(this, StateMachine);
 
         StateMachine.Initialize(IdleState);
     }
@@ -154,9 +167,9 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         IsCrouching = Input.GetKey(KeyCode.LeftControl);
 
-        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            PlayerRb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+            SetJumpPressed();
         }
     }
     private void HandleKeyboardInput()
@@ -196,6 +209,27 @@ public class PlayerController : MonoBehaviour, IDamageable
             PlayerRb.linearVelocity = new Vector3(0f, PlayerRb.linearVelocity.y, 0f);
         }
     }
+    public void RotateToCameraDirection()
+    {
+        Vector3 moveDir = new Vector3(PlayerRb.linearVelocity.x, 0f, PlayerRb.linearVelocity.z);
+
+        if (moveDir.sqrMagnitude > 0.1f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
+            return;
+        }
+
+        Vector3 forward = _cameraTransform.forward;
+        forward.y = 0;
+        forward.Normalize();
+
+        if (forward.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(forward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
+        }
+    }
     public void TweenCrouch(bool isCrouching)
     {
         float targetY = isCrouching ? _crouchYScale : _startYScale;
@@ -205,19 +239,39 @@ public class PlayerController : MonoBehaviour, IDamageable
         float groundCheckYOffset = isCrouching ? -0.5f : -0.85f;
         _groundCheck.DOLocalMoveY(groundCheckYOffset, 0.2f).SetEase(Ease.InOutSine);
     }
+    public void SetCrouch(bool isCrouching)
+    {
+        IsCrouching = isCrouching;
+        TweenCrouch(isCrouching);
+    }
     public bool IsGrounded()
     {
         return Physics.CheckSphere(_groundCheck.position, _groundCheckRadius, _groundLayer);
     }
+    public void SetJumpPressed()
+    {
+        this.JumpPressed = true;
+    }
+    public void ConsumeJumpPressed()
+    {
+        this.JumpPressed = false;
+    }
     public void OnWeaponEquipped(GunAttributes gun)
     {
-        if (gun == null)
-        {
-            _currentGunStateType = GunStateType.Global;
-            return;
-        }
-        _currentGunStateType = gun.StateType;
+        if (_gunStateMachine == null)
+            _gunStateMachine = new GunStateMachine();
+
+        //_gunStateMachine.SetOwner(this);
+
+        //if (gun == null)
+        //{
+        //    _gunStateMachine.SwitchStateByGunType(null);
+        //    return;
+        //}
+
+        //_gunStateMachine.SwitchStateByGunType(gun);
     }
+
     public GunStateType GetCurrentGunStateType() => _currentGunStateType;
 
     public void TakeDamage(int damage)

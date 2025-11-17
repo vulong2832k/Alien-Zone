@@ -6,16 +6,23 @@ public class PlayerIdleState : PlayerState
     {
     }
 
-    public override void LogicUpdate()
+    public override void HandleInput()
     {
-        base.LogicUpdate();
         if (_player.MoveInput.magnitude > 0.1f)
         {
             _state.ChangeState(_player.MoveState);
+        }
+        if (_player.JumpPressed)
+        {
+            _state.ChangeState(_player.JumpState);
         }
         else if (_player.IsCrouching)
         {
             _state.ChangeState(_player.CrouchState);
         }
+    }
+    public override void Enter()
+    {
+        _player.Animator.Play("P_Global_Idle");
     }
 }

@@ -11,7 +11,8 @@ public abstract class PlayerState
         this._state = state;
     }
     public virtual void Enter() { }
-    public virtual void LogicUpdate() { }
-    public virtual void PhysicsUpdate() { }
     public virtual void Exit() { }
+    public virtual void HandleInput() { }
+    public virtual void Update() { }
+    public virtual void FixedUpdate() { }
 }

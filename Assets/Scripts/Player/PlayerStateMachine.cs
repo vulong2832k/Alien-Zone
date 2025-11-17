@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class PlayerStateMachine
 {
     public PlayerState CurrentState { get; private set; }
@@ -11,8 +9,8 @@ public class PlayerStateMachine
     }
     public void ChangeState(PlayerState newState)
     {
-        CurrentState.Exit();
-        CurrentState = newState;
+        this.CurrentState.Exit();
+        this.CurrentState = newState;
         newState.Enter();
     }
 }
