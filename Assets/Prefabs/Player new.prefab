@@ -458,7 +458,6 @@ GameObject:
   - component: {fileID: 5003854052108966367}
   - component: {fileID: 1470827548966375127}
   - component: {fileID: 2509645657470889097}
-  - component: {fileID: 731091450570120141}
   m_Layer: 6
   m_Name: Player new
   m_TagString: Player
@@ -489,6 +488,7 @@ Transform:
   - {fileID: 6960399184646100654}
   - {fileID: 4717276493679605423}
   - {fileID: 6289164918300564494}
+  - {fileID: 6701737252938196477}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7487871855016772447
@@ -558,15 +558,16 @@ MonoBehaviour:
   _healRecoveryBonus: 0
   _healRecoveryTotal: 0
   _moveSpeed: 5
+  smoothTime: 0.25
   _jumpForce: 5
   _groundLayer:
     serializedVersion: 2
     m_Bits: 896
-  _groundCheck: {fileID: 0}
+  _groundCheck: {fileID: 6701737252938196477}
   _groundCheckRadius: 0.3
-  _body: {fileID: 0}
+  _body: {fileID: 6364413971288223682}
   _crouchSpeed: 2.5
-  _crouchYScale: 0.5
+  _crouchYScale: 0.7
   _xpToNextLevel: 100
   _xpGrowthRate: 1.2
   _weaponSlots:
@@ -626,27 +627,6 @@ MonoBehaviour:
   _throwForce: 20
   _upwardForce: 2
   _holdThreshold: 0.5
---- !u!65 &731091450570120141
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757295168203363270}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.50830555, y: 2.629307, z: 0.2831955}
-  m_Center: {x: 0.018706799, y: 1.3008746, z: -0.03384018}
 --- !u!1 &898369412657599146
 GameObject:
   m_ObjectHideFlags: 0
@@ -1790,6 +1770,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6364413971288223682}
   - component: {fileID: 3052680701650982800}
+  - component: {fileID: 3523987522579244946}
   m_Layer: 6
   m_Name: EXO_Body
   m_TagString: Untagged
@@ -1980,6 +1961,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000000037252903, y: 1.061865, z: 0.1495366}
     m_Extent: {x: 0.033120573, y: 0.006809473, z: 0.003504932}
   m_DirtyAABB: 0
+--- !u!65 &3523987522579244946
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2665156205434299252}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.50830555, y: 2.629307, z: 0.2831955}
+  m_Center: {x: 0.018706799, y: 1.3008746, z: -0.03384018}
 --- !u!1 &2687706886945693729
 GameObject:
   m_ObjectHideFlags: 0
@@ -3286,7 +3288,7 @@ Transform:
   m_GameObject: {fileID: 4982118360244232195}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.54, y: 0, z: 0}
+  m_LocalPosition: {x: 0.6, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4905,6 +4907,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _weaponParent: {fileID: 4125511113604960834}
+--- !u!1 &7308985458933492125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6701737252938196477}
+  m_Layer: 6
+  m_Name: GroundCheck
+  m_TagString: PCheckGround
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6701737252938196477
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7308985458933492125}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4002636594001390080}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7344988536455254860
 GameObject:
   m_ObjectHideFlags: 0

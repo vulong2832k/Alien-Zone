@@ -15,7 +15,7 @@ public class PlayerCameraThirdPerson : MonoBehaviour
     void Start()
     {
         if (_player == null)
-            Debug.LogWarning("Camera chưa gán Player!");
+            _player = FindAnyObjectByType<PlayerController>().transform;
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -31,12 +31,14 @@ public class PlayerCameraThirdPerson : MonoBehaviour
         pitch -= mouseY;
         pitch = Mathf.Clamp(pitch, minYAngle, maxYAngle);
 
-        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
-        Vector3 desiredPosition = _player.position + rotation * offset;
+        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
 
+        Vector3 desiredPosition = _player.position + rotation * offset;
         transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-        transform.LookAt(_player.position + Vector3.up * 1.5f);
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, smoothSpeed * Time.deltaTime);
 
         _player.rotation = Quaternion.Euler(0f, yaw, 0f);
     }
+
 }
