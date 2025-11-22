@@ -19,7 +19,10 @@ public class PlayerIdleState : PlayerState
 
         if (_player.MoveInput.magnitude > 0.1f)
         {
-            _state.ChangeState(_player.MoveState);
+            if (_player.WantWalk)
+                _state.ChangeState(_player.WalkState);
+            else
+                _state.ChangeState(_player.MoveState);
             return;
         }
 

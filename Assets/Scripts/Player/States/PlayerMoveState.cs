@@ -7,6 +7,7 @@ public class PlayerMoveState : PlayerState
     public override void Enter()
     {
         _player.Animator.Play("P_Global_Run");
+        _player.MoveSpeed = _player.DefaultMoveSpeed;
     }
 
     public override void HandleInput()
@@ -23,6 +24,12 @@ public class PlayerMoveState : PlayerState
                 _state.ChangeState(_player.CrouchWalkState);
             else
                 _state.ChangeState(_player.CrouchState);
+            return;
+        }
+
+        if (_player.WantWalk)
+        {
+            _state.ChangeState(_player.WalkState);
             return;
         }
 

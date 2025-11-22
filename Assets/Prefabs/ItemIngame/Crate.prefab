@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 2841247645653775333}
   m_Layer: 0
   m_Name: WeaponCrate
-  m_TagString: Untagged
+  m_TagString: Crate
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -312,8 +312,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.2306855, y: 0.50424105, z: 2.104169}
-  m_Center: {x: -0.04444611, y: 0.24787946, z: 0.55208397}
+  m_Size: {x: 3.046877, y: 0.50424105, z: 2.7815442}
+  m_Center: {x: -0.037539482, y: 0.24787948, z: 0.21339631}
 --- !u!114 &2841247645653775333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,6 +326,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6c5ca3adaee3d40b4ffa8f99f84cc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isMissionCrate: 0
+  _winConditionRef: {fileID: 0}
 --- !u!1 &8335440290322604452
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,10 +338,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8788481829991886710}
   - component: {fileID: 3415879246108607770}
-  - component: {fileID: 500006641685222555}
   m_Layer: 0
   m_Name: Crate
-  m_TagString: Untagged
+  m_TagString: Crate
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -381,18 +382,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.169817, y: 0.65148234, z: 1}
   m_Center: {x: -0.07594395, y: 0.30595732, z: 0}
---- !u!114 &500006641685222555
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8335440290322604452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd6c5ca3adaee3d40b4ffa8f99f84cc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8711117804659318120
 GameObject:
   m_ObjectHideFlags: 0

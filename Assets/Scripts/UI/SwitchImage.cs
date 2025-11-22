@@ -39,6 +39,7 @@ public class SwitchImage : MonoBehaviour
     {
         _spriteTypeGuns = new Dictionary<GunType, Sprite>
         {
+            {GunType.None, null},
             {GunType.Pistol, _pistolSprite },
             {GunType.SMG, _smgSprite },
             {GunType.MG, _mgSprite },
@@ -64,6 +65,14 @@ public class SwitchImage : MonoBehaviour
             GunType type = gunTypes[i];
             Debug.Log("GunType: " + type);
 
+            if (type == GunType.None)
+            {
+                _presetWeaponIcons[i].sprite = null;
+                _presetWeaponIcons[i].color = _inactiveColor;
+                _weaponImages.Add(_presetWeaponIcons[i]);
+                continue;
+            }
+
             if (_spriteTypeGuns.TryGetValue(type, out Sprite sprite))
             {
                 _presetWeaponIcons[i].sprite = sprite;
@@ -72,6 +81,7 @@ public class SwitchImage : MonoBehaviour
             _weaponImages.Add(_presetWeaponIcons[i]);
         }
     }
+
 
     public void UpdateImageUI(int currentIndex)
     {

@@ -4,15 +4,12 @@ public class PlayerWalkState : PlayerState
 
     public override void Enter()
     {
-        base.Enter();
         _player.Animator.Play("P_Global_Walk");
         _player.MoveSpeed = _player.WalkSpeed;
     }
 
     public override void HandleInput()
     {
-        base.HandleInput();
-
         if (_player.JumpPressed && _player.IsGrounded())
         {
             _state.ChangeState(_player.JumpState);
@@ -28,10 +25,21 @@ public class PlayerWalkState : PlayerState
             return;
         }
 
+        if (!_player.WantWalk)
+        {
+            _state.ChangeState(_player.MoveState);
+            return;
+        }
+
         if (_player.MoveInput.magnitude < 0.1f)
         {
             _state.ChangeState(_player.IdleState);
             return;
         }
+    }
+    public override void Update()
+    {
+        _player.PlayerMovement();
+        _player.RotateToCameraDirection();
     }
 }

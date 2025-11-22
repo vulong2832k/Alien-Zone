@@ -17,16 +17,19 @@ public class PlayerController : MonoBehaviour, IDamageable
     [Header("Move: ")]
     [SerializeField] private float _moveSpeed = 5f;
     private float _defaultMoveSpeed;
-    [SerializeField] private float _walkSpeed = 3f;
-    public float WalkSpeed => _walkSpeed;
     public Vector2 MoveInput { get; private set; }
     public float MoveSpeed {  get; set; }
-    public float MoveWalking { get; set; }
+    
     public float DefaultMoveSpeed => _defaultMoveSpeed;
-
     private float _currentYVelocity;
-
     public float smoothTime = 0.25f;
+
+    [Header("Walking:")]
+    [SerializeField] private float _walkSpeed = 3f;
+    public float WalkSpeed => _walkSpeed;
+    public float MoveWalking { get; set; }
+
+    public bool WantWalk => Input.GetKey(KeyCode.LeftShift);
 
     [Header("Jump: ")]
     [SerializeField] private float _jumpForce;
@@ -61,7 +64,9 @@ public class PlayerController : MonoBehaviour, IDamageable
     [Header("Gun: ")]
     [SerializeField] private WeaponSlots[] _weaponSlots;
 
-    private GunStateType _currentGunStateType = GunStateType.Global; 
+    private GunStateType _currentGunStateType = GunStateType.Global;
+
+    public bool ReloadPressed { get; private set; }
 
     [Header("References:")]
     [SerializeField] private Transform _cameraTransform;
@@ -82,8 +87,19 @@ public class PlayerController : MonoBehaviour, IDamageable
     public PlayerMoveState MoveState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
     public PlayerCrouchWalkState CrouchWalkState { get; private set; }
-
     public PlayerJumpState JumpState { get; private set; }
+    public PlayerWalkState WalkState { get; private set; }
+    public PlayerPickState PickState { get; private set; }
+
+    [Header("Action States: ")]
+    public PlayerActionStateMachine ActionStateMachine;
+    public PlayerNoneActionState NoneActionState;
+    public PlayerReloadState ReloadState;
+
+    public GunController Gun;
+
+    [Header("Interactable: ")]
+    public IInteractable CurrentInteractable { get; private set; }
 
     [Header("Componenets: ")]
     public Rigidbody PlayerRb { get; private set; }
@@ -99,6 +115,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     {
         InitAttributes();
         GetComponentWhenStart();
+        InitActionState();
     }
     void Start()
     {
@@ -112,6 +129,8 @@ public class PlayerController : MonoBehaviour, IDamageable
         GetInputValue();
         StateMachine.CurrentState.HandleInput();
         StateMachine.CurrentState.Update();
+
+        ActionStateMachine.CurrentState.Update();
 
         HandleKeyboardInput();
 
@@ -143,6 +162,15 @@ public class PlayerController : MonoBehaviour, IDamageable
         _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
         _animator = GetComponentInChildren<Animator>();
     }
+    private void InitActionState()
+    {
+        ActionStateMachine = new PlayerActionStateMachine();
+
+        NoneActionState = new PlayerNoneActionState(this, ActionStateMachine);
+        ReloadState = new PlayerReloadState(this, ActionStateMachine);
+
+        ActionStateMachine.Initialize(NoneActionState);
+    }
     private void InitStateMachine()
     {
         StateMachine = new PlayerStateMachine();
@@ -151,14 +179,18 @@ public class PlayerController : MonoBehaviour, IDamageable
         CrouchState = new PlayerCrouchState(this, StateMachine);
         JumpState = new PlayerJumpState(this, StateMachine);
         CrouchWalkState = new PlayerCrouchWalkState(this, StateMachine);
+        WalkState =  new PlayerWalkState(this, StateMachine);
+        PickState =  new PlayerPickState(this, StateMachine);
 
         StateMachine.Initialize(IdleState);
     }
     private void GetInputValue()
     {
-        MoveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        MoveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         IsCrouching = Input.GetKey(KeyCode.LeftControl);
+
+        ReloadPressed = Input.GetKeyDown(KeyCode.R);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -175,6 +207,11 @@ public class PlayerController : MonoBehaviour, IDamageable
         {
             TryUseAmmo();
         }
+        if (Input.GetKeyDown(KeyCode.E) && CurrentInteractable != null)
+        {
+            StateMachine.ChangeState(PickState);
+        }
+        
     }
     public void PlayerMovement()
     {
@@ -217,10 +254,6 @@ public class PlayerController : MonoBehaviour, IDamageable
             float newYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref _currentYVelocity, smoothTime);
             transform.rotation = Quaternion.Euler(0f, newYaw, 0f);
         }
-    }
-    public void PlayerWalking()
-    {
-
     }
     public void TweenCrouch(bool isCrouching)
     {
@@ -382,7 +415,22 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
         }
     }
-
+    #endregion
+    #region Interactable
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Crate"))
+        {
+            CurrentInteractable = other.GetComponent<IInteractable>();
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Crate"))
+        {
+            CurrentInteractable = null;
+        }
+    }
     #endregion
     private void OnDrawGizmosSelected()
     {

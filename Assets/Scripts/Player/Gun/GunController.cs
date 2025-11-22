@@ -18,6 +18,8 @@ public class GunController : MonoBehaviour
     [SerializeField] private int _reserveAmmo;
     private float _fireCooldown;
 
+    public bool BlockFire = false;
+
     public event Action<int, int, bool> OnAmmoChanged;
     public GunAttributes GunAttributes => _soHolder.GunAttributes;
     public GunType GunType => GunAttributes.GunType;
@@ -33,10 +35,12 @@ public class GunController : MonoBehaviour
     {
         get
         {
-            if (GunAttributes == null || GunAttributes.FireSpeed <= 0f) return 0f;
+            if (_soHolder == null || GunAttributes == null || GunAttributes.FireSpeed <= 0f)
+                return 0f;
             return Mathf.Clamp01(1f - (_fireCooldown / GunAttributes.FireSpeed));
         }
     }
+
 
     private void Awake()
     {
@@ -68,7 +72,6 @@ public class GunController : MonoBehaviour
         AlignFirePointWithCamera();
 
         HandleShooting();
-        HandleReload();
 
         if (_fireCooldown > 0)
         {
@@ -80,6 +83,14 @@ public class GunController : MonoBehaviour
             {
                 NotifyAmmoChanged();
             }
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            AddReserveAmmo(10);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            TryReload();
         }
     }
 
@@ -104,8 +115,7 @@ public class GunController : MonoBehaviour
         }
     }
 
-    private bool CanFire() =>
-        _fireCooldown <= 0 && !_isReloading && _currentAmmo > 0;
+    private bool CanFire() => _fireCooldown <= 0 && !_isReloading && _currentAmmo > 0;
 
     private void Shooting()
     {
@@ -157,71 +167,74 @@ public class GunController : MonoBehaviour
             default: return "PlayerBulletNormal";
         }
     }
-
-    private void HandleReload()
+    public bool NeedsReload()
     {
-        if (_isReloading) return;
+        if (_isReloading) return false;
 
-        var inventory = SpawnPlayer.PlayerInventory;
-        var ammoSO = GunAttributes.RequiredAmmo;
-        int reserve = (inventory != null && ammoSO != null) ? inventory.GetItemCount(ammoSO) : 0;
-
-        bool use = Input.GetKeyDown(KeyCode.R) && _currentAmmo < GunAttributes.Ammo && reserve > 0;
-        bool auto = _currentAmmo <= 0 && reserve > 0;
-
-        if (use || auto)
-        {
-            _isReloading = true;
-            NotifyAmmoChanged(true);
-            StartCoroutine(Reload());
-        }
+        return _currentAmmo < GunAttributes.Ammo && _reserveAmmo > 0;
     }
-    private IEnumerator Reload()
+    public bool CanReload()//Check
     {
-        yield return new WaitForSeconds(GunAttributes.Reload);
+        if (_isReloading) return false;
 
-        var inventory = SpawnPlayer.PlayerInventory;
-        var ammoSO = GunAttributes.RequiredAmmo;
+        return _reserveAmmo > 0 && _currentAmmo < GunAttributes.Ammo;
+    }
 
-        if (inventory == null || ammoSO == null) yield break;
-
+    public void DoReload()//Action
+    {
         int ammoNeeded = GunAttributes.Ammo - _currentAmmo;
-        int available = inventory.GetItemCount(ammoSO);
-        int toReload = Mathf.Min(ammoNeeded, available);
+
+        int toReload = Mathf.Min(ammoNeeded, _reserveAmmo);
 
         if (toReload > 0)
         {
             _currentAmmo += toReload;
+            _reserveAmmo -= toReload;
+
             _soHolder.CurrentAmmo = _currentAmmo;
-            inventory.RemoveItem(ammoSO, toReload);
+            _soHolder.ReserveAmmo = _reserveAmmo;
+
             GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
         }
+
+        NotifyAmmoChanged();
+    }
+    public void TryReload()
+    {
+        if (!CanReload()) return;
+
+        _isReloading = true;
+        NotifyAmmoChanged(true);
+
+        StartCoroutine(ReloadRoutine());
+    }
+    private IEnumerator ReloadRoutine()
+    {
+        yield return new WaitForSeconds(GunAttributes.Reload);
+
+        DoReload();
 
         _isReloading = false;
         NotifyAmmoChanged(false);
     }
-
     #region UI
     public void AddReserveAmmo(int amount)
     {
         _reserveAmmo += amount;
         _reserveAmmo = Mathf.Clamp(_reserveAmmo, 0, GunAttributes.MaxAmmo);
 
-        GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
+        _soHolder.ReserveAmmo = _reserveAmmo;
 
+        GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
         NotifyAmmoChanged();
     }
 
+
     private void NotifyAmmoChanged(bool isReloading = false)
     {
-        var inventory = SpawnPlayer.PlayerInventory;
-        var ammoSO = GunAttributes.RequiredAmmo;
-        int reserve = (inventory != null && ammoSO != null)
-            ? inventory.GetItemCount(ammoSO)
-            : 0;
-
-        OnAmmoChanged?.Invoke(_currentAmmo, reserve, isReloading);
+        OnAmmoChanged?.Invoke(_currentAmmo, _reserveAmmo, isReloading);
     }
+
     #endregion
 
     #region Effect

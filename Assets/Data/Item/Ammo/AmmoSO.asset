@@ -19,4 +19,5 @@ MonoBehaviour:
   isStackable: 1
   maxStack: 999
   gunAttributes: {fileID: 0}
-  percentRecover: 0.05
+  minPercentRecover: 0.05
+  maxPercentRecover: 0.15

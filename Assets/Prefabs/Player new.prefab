@@ -559,6 +559,7 @@ MonoBehaviour:
   _healRecoveryTotal: 0
   _moveSpeed: 5
   smoothTime: 0.25
+  _walkSpeed: 3
   _jumpForce: 5
   _groundLayer:
     serializedVersion: 2
@@ -957,7 +958,7 @@ GameObject:
   - component: {fileID: 8878784492484228082}
   m_Layer: 6
   m_Name: EXO_Caruncula
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1381,7 +1382,7 @@ GameObject:
   - component: {fileID: 7854447892656565981}
   m_Layer: 6
   m_Name: EXO_Eyes
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1770,10 +1771,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6364413971288223682}
   - component: {fileID: 3052680701650982800}
-  - component: {fileID: 3523987522579244946}
+  - component: {fileID: 6961547532366202652}
   m_Layer: 6
   m_Name: EXO_Body
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1787,7 +1788,7 @@ Transform:
   m_GameObject: {fileID: 2665156205434299252}
   serializedVersion: 2
   m_LocalRotation: {x: 8.040613e-17, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: -0, y: 1.851, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1961,8 +1962,8 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000000037252903, y: 1.061865, z: 0.1495366}
     m_Extent: {x: 0.033120573, y: 0.006809473, z: 0.003504932}
   m_DirtyAABB: 0
---- !u!65 &3523987522579244946
-BoxCollider:
+--- !u!136 &6961547532366202652
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1979,9 +1980,11 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.50830555, y: 2.629307, z: 0.2831955}
-  m_Center: {x: 0.018706799, y: 1.3008746, z: -0.03384018}
+  serializedVersion: 2
+  m_Radius: 0.29
+  m_Height: 2.8
+  m_Direction: 1
+  m_Center: {x: -0.00000011920929, y: -0.54, z: 0}
 --- !u!1 &2687706886945693729
 GameObject:
   m_ObjectHideFlags: 0
@@ -2402,7 +2405,7 @@ GameObject:
   - component: {fileID: 6289164918300564494}
   m_Layer: 6
   m_Name: mixamorig:Hips
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2532,7 +2535,7 @@ GameObject:
   - component: {fileID: 4423519716469664351}
   m_Layer: 6
   m_Name: EXO_Teeth
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3044,7 +3047,7 @@ GameObject:
   - component: {fileID: 6639177450601252079}
   m_Layer: 6
   m_Name: EXO_HeadMask
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3625,7 +3628,7 @@ GameObject:
   - component: {fileID: 8143573399310392536}
   m_Layer: 6
   m_Name: Head
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3659,7 +3662,7 @@ GameObject:
   - component: {fileID: 8019464709648507537}
   m_Layer: 6
   m_Name: Exo_Suit
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4581,7 +4584,7 @@ GameObject:
   - component: {fileID: 5249974302576408516}
   m_Layer: 6
   m_Name: EXO_EyesSpec
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4918,7 +4921,7 @@ GameObject:
   - component: {fileID: 6701737252938196477}
   m_Layer: 6
   m_Name: GroundCheck
-  m_TagString: PCheckGround
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5107,7 +5110,7 @@ GameObject:
   - component: {fileID: 350765239651658229}
   m_Layer: 6
   m_Name: EXO_BrowsLashes
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

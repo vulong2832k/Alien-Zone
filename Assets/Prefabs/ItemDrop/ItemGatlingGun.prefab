@@ -59,7 +59,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -81,7 +81,7 @@ MonoBehaviour:
   amount: 1
   pickupRange: 1
   pickupKey: 99
-  _rotateSpeed: 0
+  _rotateSpeed: 120
 --- !u!1 &993239628176493703
 GameObject:
   m_ObjectHideFlags: 0

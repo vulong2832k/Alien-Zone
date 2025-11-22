@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
-using System;
 
 public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
@@ -11,9 +11,10 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     [SerializeField] private ItemType _allowedType;
     [SerializeField] private Image _icon;
     [SerializeField] private Sprite _emptySlotSprite;
+
     [SerializeField] private TextMeshProUGUI _amountText;
 
-    //Gun
+    // Gun
     [SerializeField] private int _slotIndex;
     [SerializeField] private WeaponSwitching _weaponSwitching;
 
@@ -22,33 +23,25 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     public bool IsEmpty => _slot.IsEmpty;
     public ItemType AllowedType => _allowedType;
     public ItemSO GetItem() => _slot.item;
+
+    private void Awake()
+    {
+        
+    }
+
     private void Start()
     {
         if (_weaponSwitching == null)
         {
-            var allSwitchers = FindObjectsByType<WeaponSwitching>(FindObjectsInactive.Include,FindObjectsSortMode.None);
-
+            var allSwitchers = FindObjectsByType<WeaponSwitching>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             if (allSwitchers.Length > 0)
-            {
                 _weaponSwitching = allSwitchers[0];
-            }
         }
 
         _icon.sprite = _emptySlotSprite;
         _icon.enabled = true;
     }
-    private int GetMaxAllowed(ItemType type)
-    {
-        switch (type)
-        {
-            case ItemType.Weapon: return 1;
-            case ItemType.HeadArmor: return 1;
-            case ItemType.Armor: return 1;
-            case ItemType.Medicine: return 10;
-            case ItemType.Grenade: return 15;
-            default: return 99;
-        }
-    }
+
     public void OnDrop(PointerEventData eventData)
     {
         var draggedSlotUI = eventData.pointerDrag?.GetComponent<InventorySlotUI>();
@@ -67,13 +60,9 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         int moveAmount = Mathf.Min(fromSlot.amount, canAdd);
 
         if (_slot.IsEmpty)
-        {
             _slot.AssignItem(item, moveAmount);
-        }
         else if (_slot.item == item)
-        {
             _slot.amount += moveAmount;
-        }
 
         _icon.sprite = item.icon;
         _icon.enabled = true;
@@ -84,21 +73,14 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         draggedSlotUI.UpdateUI();
 
         UpdateAmountText();
+        NotifySlotChanged();
 
-        if (_allowedType == ItemType.Weapon && item.gunAttributes != null)
+        if (_allowedType == ItemType.Weapon && item.gunAttributes != null && _weaponSwitching != null)
         {
-            if (_weaponSwitching != null)
-            {
-                _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
-
-                var playerController = FindAnyObjectByType<PlayerController>();
-                if (playerController != null)
-                {
-                    playerController.OnWeaponEquipped(item.gunAttributes);
-                }
-            }
+            _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
         }
     }
+
     public void Unequip()
     {
         if (_slot.IsEmpty) return;
@@ -106,36 +88,43 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         var inventory = FindAnyObjectByType<InventorySystem>();
         inventory.AddItem(_slot.item, _slot.amount);
 
-        if (_allowedType == ItemType.Weapon && _slot.item.gunAttributes != null)
+        if (_allowedType == ItemType.Weapon && _slot.item.gunAttributes != null && _weaponSwitching != null)
         {
-            _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, null);
+            _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, null, false);
         }
 
         _slot.Clear();
         _icon.sprite = _emptySlotSprite;
+        UpdateAmountText();
         NotifySlotChanged();
     }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
-        {
             Unequip();
-        }
     }
+
     private void UpdateAmountText()
     {
         if (_amountText == null) return;
 
-        if (_slot.IsEmpty || _slot.amount <= 1)
-        {
-            _amountText.text = "";
-        }
-        else
-        {
-            _amountText.text = _slot.amount.ToString();
-        }
-        NotifySlotChanged();
+        _amountText.text = (_slot.IsEmpty || _slot.amount <= 1) ? "" : _slot.amount.ToString();
     }
+
+    private int GetMaxAllowed(ItemType type)
+    {
+        return type switch
+        {
+            ItemType.Weapon => 1,
+            ItemType.HeadArmor => 1,
+            ItemType.Armor => 1,
+            ItemType.Medicine => 10,
+            ItemType.Grenade => 15,
+            _ => 99,
+        };
+    }
+
     public void ReduceItem(int amount)
     {
         if (_slot.IsEmpty) return;
@@ -145,11 +134,15 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         {
             _slot.Clear();
             _icon.sprite = _emptySlotSprite;
+
+            if (_allowedType == ItemType.Weapon && _weaponSwitching != null)
+                _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, null, false);
         }
 
         UpdateAmountText();
         NotifySlotChanged();
     }
+
     private void NotifySlotChanged()
     {
         if (_slot.IsEmpty)

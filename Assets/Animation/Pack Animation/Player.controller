@@ -769,7 +769,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: P_Global_PickUp
+  m_Name: P_Global_Pick
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []

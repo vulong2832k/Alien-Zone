@@ -1,6 +1,7 @@
+using System.Collections;
 using UnityEngine;
 
-public class WeaponCrate : MonoBehaviour
+public class WeaponCrate : MonoBehaviour, IInteractable
 {
     private Animator _animator;
 
@@ -24,31 +25,26 @@ public class WeaponCrate : MonoBehaviour
             _winCondition = FindFirstObjectByType<FindSecretsCondition>();
         }
     }
-
-    private void OnTriggerStay(Collider other)
+    public void Interact(PlayerController player)
     {
-        if (Input.GetKey(KeyCode.E))
+        if (_opened) return;
+
+        _opened = true;
+        _animator.SetBool("Open", true);
+        StartCoroutine(AutoClose());
+
+        if (_isMissionCrate && _winCondition != null)
         {
-            _animator.SetBool("Open", true);
-
-            if (!_opened)
+            if (_winCondition is FindSecretsCondition secretCondition)
             {
-                _opened = true;
-
-                if (_isMissionCrate && _winCondition != null)
-                {
-                    if (_winCondition is FindSecretsCondition secretCondition)
-                    {
-                        secretCondition.RegisterSecretFound();
-                        Debug.Log("Mission secret registered!");
-                    }
-                }
+                secretCondition.RegisterSecretFound();
+                Debug.Log("Mission secret registered!");
             }
         }
     }
-
-    private void OnTriggerExit(Collider other)
+    private IEnumerator AutoClose()
     {
+        yield return new WaitForSeconds(4f);
         _animator.SetBool("Open", false);
     }
 }
