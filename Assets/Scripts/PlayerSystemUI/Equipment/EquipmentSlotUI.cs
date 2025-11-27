@@ -26,7 +26,14 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
 
     private void Awake()
     {
-        
+        if (_weaponSwitching == null)
+        {
+            var allSwitchers = FindObjectsByType<WeaponSwitching>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            if (allSwitchers.Length > 0)
+                _weaponSwitching = allSwitchers[0];
+            else
+                Debug.LogError("Không tìm thấy WeaponSwitching trong scene!");
+        }
     }
 
     private void Start()
@@ -75,9 +82,17 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         UpdateAmountText();
         NotifySlotChanged();
 
-        if (_allowedType == ItemType.Weapon && item.gunAttributes != null && _weaponSwitching != null)
+        if (_allowedType == ItemType.Weapon && item.gunAttributes != null)
         {
-            _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
+            if (_weaponSwitching != null)
+            {
+                GunController newGun = _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
+                if (PlayerController.Instance != null)
+                {
+                    PlayerController.Instance.Gun = newGun;
+                    WeaponEvents.OnWeaponChanged?.Invoke(newGun);
+                }
+            }
         }
     }
 

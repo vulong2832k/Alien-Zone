@@ -7,18 +7,14 @@ public class PlayerNoneActionState : PlayerActionState
 
     public override void Update()
     {
-        if (_player.Gun == null) return;
+        if (_player.Gun == null)
+            return;
 
-        if (_player.ReloadPressed && _player.Gun.CanReload())
+        if (_player.ReloadPressed)
         {
+            _player.ReloadPressed = false;
             _actionState.ChangeState(_player.ReloadState);
             return;
-        }
-
-        // Auto reload nếu hết đạn
-        if (_player.Gun.NeedsReload())
-        {
-            _actionState.ChangeState(_player.ReloadState);
         }
     }
 }

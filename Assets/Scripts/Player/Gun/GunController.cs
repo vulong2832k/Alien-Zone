@@ -88,10 +88,10 @@ public class GunController : MonoBehaviour
         {
             AddReserveAmmo(10);
         }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            TryReload();
-        }
+        //if (Input.GetKeyDown(KeyCode.R))
+        //{
+        //    TryReload();
+        //}
     }
 
     private void SetTypeShoot()
@@ -176,8 +176,9 @@ public class GunController : MonoBehaviour
     public bool CanReload()//Check
     {
         if (_isReloading) return false;
-
-        return _reserveAmmo > 0 && _currentAmmo < GunAttributes.Ammo;
+        if (CurrentAmmo >= GunAttributes.MaxAmmo) return false;
+        if (ReserveAmmo <= 0) return false;
+        return true;
     }
 
     public void DoReload()//Action
@@ -196,7 +197,6 @@ public class GunController : MonoBehaviour
 
             GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
         }
-
         NotifyAmmoChanged();
     }
     public void TryReload()
@@ -205,7 +205,7 @@ public class GunController : MonoBehaviour
 
         _isReloading = true;
         NotifyAmmoChanged(true);
-
+        
         StartCoroutine(ReloadRoutine());
     }
     private IEnumerator ReloadRoutine()

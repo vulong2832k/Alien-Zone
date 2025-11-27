@@ -2,23 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class WeaponSwitching : MonoBehaviour
 {
+    public static class WeaponEvents
+    {
+        public static Action<GunController> OnWeaponChanged;
+    }
+
     [Header("Gun Setup")]
     [SerializeField] private Transform _gunParent;
     [SerializeField] private SwitchImage _switchImage;
     private List<GunController> _equippedGuns = new List<GunController>();
     private int _currentIndex = 0;
-
-    public GunController CurrentGun
-    {
-        get
-        {
-            if (_currentIndex >= 0 && _currentIndex < _equippedGuns.Count)
-                return _equippedGuns[_currentIndex];
-            return null;
-        }
-    }
+    public GunController CurrentGun { get; private set; }
 
     private void Awake()
     {
@@ -110,15 +108,14 @@ public class WeaponSwitching : MonoBehaviour
 
         _currentIndex = index;
         UpdateUI();
-
-        if (CurrentGun != null)
-            WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
+        CurrentGun = _equippedGuns[_currentIndex];
+        WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
     }
 
-    public void SpawnAndEquipWeapon(int slotIndex, GunAttributes gunAttributes, bool showImmediately = false)
+    public GunController SpawnAndEquipWeapon(int slotIndex, GunAttributes gunAttributes, bool showImmediately = false)
     {
-        if (_gunParent == null) return;
-        if (slotIndex < 0 || slotIndex >= _gunParent.childCount) return;
+        if (_gunParent == null) return null;
+        if (slotIndex < 0 || slotIndex >= _gunParent.childCount) return null;
 
         Transform slot = _gunParent.GetChild(slotIndex);
 
@@ -148,9 +145,21 @@ public class WeaponSwitching : MonoBehaviour
         if (showImmediately)
             ShowWeapon(slotIndex);
         else
+        {
+            CurrentGun = _equippedGuns[slotIndex];
+            WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
             UpdateUI();
+        }
+
+        return gunController;
     }
 
+    public void SwitchGun(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedGuns.Count) return;
+
+        ShowWeapon(slotIndex);
+    }
 
     private void UpdateUI()
     {

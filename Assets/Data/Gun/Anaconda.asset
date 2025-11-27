@@ -25,6 +25,6 @@ MonoBehaviour:
   _speardAngle: 0
   _gunType: 1
   _bulletType: 0
-  _positionOffset: {x: 0.24, y: 0, z: -0.07}
+  _positionOffset: {x: -0.043, y: -0.048, z: -0.098}
   _rotationOffset: {x: 0, y: 0, z: 0}
   _scaleOffset: {x: 1, y: 1, z: 1}

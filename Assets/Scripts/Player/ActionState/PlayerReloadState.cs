@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class PlayerReloadState : PlayerActionState
@@ -8,11 +8,20 @@ public class PlayerReloadState : PlayerActionState
 
     public override void Enter()
     {
+        if (_player.Gun == null)
+        {
+            Debug.LogError("ReloadState → _player.Gun NULL!");
+            _actionState.ChangeState(_player.NoneActionState);
+            return;
+        }
+
         _player.Gun.BlockFire = true;
         string anim = GetReloadAnimation();
         _player.Animator.Play(anim);
+
         _player.StartCoroutine(ReloadRoutine());
     }
+
 
     public override void Exit()
     {
@@ -32,10 +41,22 @@ public class PlayerReloadState : PlayerActionState
 
     private IEnumerator ReloadRoutine()
     {
-        yield return new WaitForSeconds(_player.Gun.GunAttributes.Reload);
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        AnimatorStateInfo info = _player.Animator.GetCurrentAnimatorStateInfo(0);
+        while (!info.IsName(GetReloadAnimation()))
+        {
+            info = _player.Animator.GetCurrentAnimatorStateInfo(0);
+            yield return null;
+        }
+
+        float animTime = info.length;
+
+        yield return new WaitForSeconds(animTime);
 
         _player.Gun.DoReload();
-
         _actionState.ChangeState(_player.NoneActionState);
     }
+
 }

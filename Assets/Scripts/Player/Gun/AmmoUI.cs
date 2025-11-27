@@ -12,7 +12,14 @@ public class AmmoUI : MonoBehaviour, IAmmoObserver
     private void OnEnable()
     {
         WeaponEvents.OnWeaponChanged += OnWeaponChanged;
+
+        if (PlayerController.Instance != null && PlayerController.Instance.Gun != null)
+        {
+            OnWeaponChanged(PlayerController.Instance.Gun);
+        }
     }
+
+
     private void OnDisable()
     {
         WeaponEvents.OnWeaponChanged -= OnWeaponChanged;
@@ -36,6 +43,8 @@ public class AmmoUI : MonoBehaviour, IAmmoObserver
     }
     private void OnWeaponChanged(GunController newGun)
     {
+        Debug.Log("AmmoUI: OnWeaponChanged called with " + (newGun ? newGun.name : "null"));
+
         UnsubscribeFromGun();
 
         _gun = newGun;

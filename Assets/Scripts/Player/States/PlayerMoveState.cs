@@ -6,8 +6,21 @@ public class PlayerMoveState : PlayerState
 
     public override void Enter()
     {
-        _player.Animator.Play("P_Global_Run");
         _player.MoveSpeed = _player.DefaultMoveSpeed;
+
+        _player.PlayGunBasedAnimation(
+            "P_Global_Run",
+            "P_Pistol_Run",
+            "P_Rifle_Run"
+        );
+    }
+    public override void OnGunChanged()
+    {
+        _player.PlayGunBasedAnimation(
+            "P_Global_Run",
+            "P_Pistol_Run",
+            "P_Rifle_Run"
+        );
     }
 
     public override void HandleInput()

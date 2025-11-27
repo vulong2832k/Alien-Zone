@@ -6,11 +6,29 @@ public class PlayerIdleState : PlayerState
 
     public override void Enter()
     {
-        _player.Animator.Play("P_Global_Idle");
+        _player.PlayGunBasedAnimation(
+            "P_Global_Idle",
+            "P_Pistol_Idle",
+            "P_Rifle_Idle"
+        );
     }
-
+    public override void OnGunChanged()
+    {
+        _player.PlayGunBasedAnimation(
+            "P_Global_Idle",
+            "P_Pistol_Idle",
+            "P_Rifle_Idle"
+        );
+    }
     public override void HandleInput()
     {
+        if (_player.ReloadPressed)
+        {
+            _player.ReloadPressed = false;
+            _player.ActionStateMachine.ChangeState(_player.ReloadState);
+            return;
+        }
+
         if (_player.JumpPressed && _player.IsGrounded())
         {
             _state.ChangeState(_player.JumpState);
@@ -36,5 +54,6 @@ public class PlayerIdleState : PlayerState
     {
         base.Update();
         _player.RotateToCameraDirection();
+        _player.ReloadPressed = false;
     }
 }

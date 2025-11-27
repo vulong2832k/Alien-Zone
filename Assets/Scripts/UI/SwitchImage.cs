@@ -63,7 +63,6 @@ public class SwitchImage : MonoBehaviour
         for (int i = 0; i < gunTypes.Count && i < _presetWeaponIcons.Count; i++)
         {
             GunType type = gunTypes[i];
-            Debug.Log("GunType: " + type);
 
             if (type == GunType.None)
             {

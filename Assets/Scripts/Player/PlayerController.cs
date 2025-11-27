@@ -6,6 +6,8 @@ using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour, IDamageable
 {
+    public static PlayerController Instance { get; private set; }
+
     [SerializeField] private int _maxHP;
     [SerializeField] private int _currentHP;
     [SerializeField] private float _healRecoveryBasic;
@@ -62,26 +64,27 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private float _xpGrowthRate = 1.2f;
 
     [Header("Gun: ")]
+    public GunController Gun;
     [SerializeField] private WeaponSlots[] _weaponSlots;
 
     private GunStateType _currentGunStateType = GunStateType.Global;
 
-    public bool ReloadPressed { get; private set; }
+    public bool ReloadPressed;
 
     [Header("References:")]
     [SerializeField] private Transform _cameraTransform;
     public Transform CameraTransform => _cameraTransform;
 
-    private WeaponSwitching _weaponSwitching;
+    [SerializeField] private WeaponSwitching _weaponSwitching;
 
-    private float _turnSmoothVelocity;
+    private float _turnSmoothVelocity;  
 
     private GunStateMachine _gunStateMachine;
 
     [Header("Coroutine: ")]
     private Coroutine _healRoutine;
 
-    [Header("States: ")]
+    [Header("StateMachine: ")]
     public PlayerStateMachine StateMachine { get; private set; }
     public PlayerIdleState IdleState { get; private set; }
     public PlayerMoveState MoveState { get; private set; }
@@ -90,13 +93,12 @@ public class PlayerController : MonoBehaviour, IDamageable
     public PlayerJumpState JumpState { get; private set; }
     public PlayerWalkState WalkState { get; private set; }
     public PlayerPickState PickState { get; private set; }
+    public PlayerDeadState DeadState { get; private set; }
 
-    [Header("Action States: ")]
+    [Header("Action StateMachine: ")]
     public PlayerActionStateMachine ActionStateMachine;
     public PlayerNoneActionState NoneActionState;
     public PlayerReloadState ReloadState;
-
-    public GunController Gun;
 
     [Header("Interactable: ")]
     public IInteractable CurrentInteractable { get; private set; }
@@ -113,12 +115,34 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        if (_weaponSwitching == null)
+            _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
+
+        if (_weaponSwitching != null)
+            Gun = _weaponSwitching.CurrentGun;
+
         InitAttributes();
         GetComponentWhenStart();
         InitActionState();
+
+        WeaponEvents.OnWeaponChanged += OnGunChanged;
     }
+
     void Start()
     {
+        Gun = _weaponSwitching.CurrentGun;
+        if (Gun != null)
+        {
+            WeaponEvents.OnWeaponChanged?.Invoke(Gun);
+        }
+
         _healRoutine = StartCoroutine(HealOverTime());
         InitStateMachine();
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
@@ -127,12 +151,13 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void Update()
     {
         GetInputValue();
+
         StateMachine.CurrentState.HandleInput();
         StateMachine.CurrentState.Update();
 
-        ActionStateMachine.CurrentState.Update();
-
         HandleKeyboardInput();
+
+        ActionStateMachine.CurrentState.Update();
 
         if (Input.GetKeyDown(KeyCode.K)) AddXP(25);
     }
@@ -162,6 +187,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
         _animator = GetComponentInChildren<Animator>();
     }
+    #region State Pattern
     private void InitActionState()
     {
         ActionStateMachine = new PlayerActionStateMachine();
@@ -181,16 +207,70 @@ public class PlayerController : MonoBehaviour, IDamageable
         CrouchWalkState = new PlayerCrouchWalkState(this, StateMachine);
         WalkState =  new PlayerWalkState(this, StateMachine);
         PickState =  new PlayerPickState(this, StateMachine);
+        DeadState =  new PlayerDeadState(this, StateMachine);
 
         StateMachine.Initialize(IdleState);
     }
+    public void PlayGunBasedAnimation(string global, string pistol, string rifle)
+    {
+        if (Gun == null)
+        {
+            Animator.Play(global);
+            return;
+        }
+
+        switch (_currentGunStateType)
+        {
+            case GunStateType.Pistol:
+                Animator.Play(pistol);
+                break;
+            case GunStateType.Rifle:
+                Animator.Play(rifle);
+                break;
+            default:
+                Animator.Play(global);
+                break;
+        }
+    }
+    private void RefreshCurrentStateAnimation()
+    {
+        if (StateMachine == null || StateMachine.CurrentState == null)
+            return;
+
+        StateMachine.CurrentState.OnGunChanged();
+    }
+    #endregion
+    #region Event
+    private void OnDestroy()
+    {
+        WeaponEvents.OnWeaponChanged -= OnGunChanged;
+    }
+    private void OnGunChanged(GunController newGun)
+    {
+        Gun = newGun;
+
+        if (Gun != null && Gun.GunAttributes != null)
+        {
+            _currentGunStateType = Gun.GunAttributes.StateType;
+        }
+        else
+        {
+            _currentGunStateType = GunStateType.Global;
+        }
+
+        RefreshCurrentStateAnimation();
+    }
+    #endregion
     private void GetInputValue()
     {
         MoveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         IsCrouching = Input.GetKey(KeyCode.LeftControl);
 
-        ReloadPressed = Input.GetKeyDown(KeyCode.R);
+        if (Input.GetKeyDown(KeyCode.R) && Gun != null && Gun.CanReload())
+        {
+            ReloadPressed = true;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -232,7 +312,8 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
 
         Vector3 targetVel = inputMove.normalized * MoveSpeed;
-        PlayerRb.linearVelocity = new Vector3(targetVel.x, PlayerRb.linearVelocity.y, targetVel.z);
+        Vector3 newVel = Vector3.Lerp(PlayerRb.linearVelocity, new Vector3(targetVel.x, PlayerRb.linearVelocity.y, targetVel.z), 0.2f);
+        PlayerRb.linearVelocity = newVel;
     }
     public void RotateToCameraDirection()
     {
@@ -309,7 +390,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         if (_currentHP <= 0)
         {
             if (_healRoutine != null) StopCoroutine(_healRoutine);
-            gameObject.SetActive(false);
+            StateMachine.ChangeState(DeadState);
         }
     }
     private IEnumerator HealOverTime()

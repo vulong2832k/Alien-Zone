@@ -15,4 +15,12 @@ public abstract class PlayerState
     public virtual void HandleInput() { }
     public virtual void Update() { }
     public virtual void FixedUpdate() { }
+    public virtual void OnGunChanged()
+    {
+        _player.PlayGunBasedAnimation(
+            "P_Global_Idle",
+            "P_Pistol_Idle",
+            "P_Rifle_Idle"
+        );
+    }
 }
