@@ -1,21 +1,19 @@
 fileFormatVersion: 2
-guid: c76e1dd902d7cfe488a45d500f98d871
+guid: 944ba8b2157732643a198f337b36cb7d
 AssetOrigin:
   serializedVersion: 1
   productId: 249944
   packageName: Stylized Ant Character
   packageVersion: 1.0
-  assetPath: Assets/Stylized Ant Character/FBX/Mesh/SK_Ant.fbx
+  assetPath: Assets/Stylized Ant Character/FBX/Animations/AS_Ant_Jump_Attack.fbx
   uploadId: 570982
 ModelImporter:
   serializedVersion: 22200
-  internalIDToNameTable: []
-  externalObjects:
+  internalIDToNameTable:
   - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: M_Ant
-    second: {fileID: 2100000, guid: 20432f87187f766499da2d413a986435, type: 2}
+      74: -6261164906300665102
+    second: Ant_Jump_Attack
+  externalObjects: {}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -41,7 +39,36 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Ant_Jump_Attack
+      takeName: Ant_Jump_Attack
+      internalID: 0
+      firstFrame: 0
+      lastFrame: 46
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -100,7 +127,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.0069999998
+    globalScale: 0.7
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
@@ -109,7 +136,7 @@ ModelImporter:
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 1
+  avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 1

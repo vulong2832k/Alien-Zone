@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: e6b070634da492a48a576974248d64b9
+AssetOrigin:
+  serializedVersion: 1
+  productId: 189463
+  packageName: 'Monster: Wolf boss'
+  packageVersion: 1.0
+  assetPath: Assets/Hatogame_new/BossMonsterPack1/Wolfboss/Mesh/Wolfboss_skin.FBX
+  uploadId: 626876
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -16,8 +23,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -35,7 +40,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 0.3
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -90,7 +95,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
+    globalScale: 0.015
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
@@ -107,10 +112,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 189463
-  packageName: 'Monster: Wolf boss'
-  packageVersion: 1.0
-  assetPath: Assets/Hatogame_new/BossMonsterPack1/Wolfboss/Mesh/Wolfboss_skin.FBX
-  uploadId: 626876

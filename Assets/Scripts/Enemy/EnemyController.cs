@@ -12,6 +12,7 @@ public class EnemyController : MonoBehaviour, IDamageable
     [Header("References: ")]
     public EnemySO dataEnemy;
     [SerializeField] private Transform _targetPlayer;
+    public Transform Target => _targetPlayer;
     [SerializeField] private string _enemyKey = "Enemy";
     [SerializeField] private EnemyStats _stats;
 
@@ -23,11 +24,17 @@ public class EnemyController : MonoBehaviour, IDamageable
     private bool _playerInRange = false;
     public bool IsAlive { get; private set; } = true;
 
+    [Header("StateMachine: ")]
+    public EnemyStateMachine stateMachine;
+
+    public EnemyIdleState IdleState { get; private set; }
+
     //Event
     public event Action<EnemyController> OnEnemyDie;
 
     private void Awake()
     {
+        InitStateMachine();
         _agent = GetComponent<NavMeshAgent>();
         _stats = GetComponent<EnemyStats>();
         _targetPlayer = FindAnyObjectByType<PlayerController>().transform;
@@ -41,16 +48,18 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (_agent != null)
             _agent.isStopped = false;
     }
-    private void Start()
+    private IEnumerator Start()
     {
-        StartCoroutine(WaitForPlayer());
-
+        yield return StartCoroutine(WaitForPlayer());
+        stateMachine.Initialize(IdleState);
         if (dataEnemy != null)
             _agent.speed = dataEnemy.MoveSpeed;
     }
+
     private void Update()
     {
         CheckTypeAttack();
+        stateMachine.CurrentState.LogicUpdate();
     }
     private void FixedUpdate()
     {
@@ -62,6 +71,13 @@ public class EnemyController : MonoBehaviour, IDamageable
             if (moveDir != Vector3.zero)
                 transform.rotation = Quaternion.LookRotation(moveDir);
         }
+        stateMachine.CurrentState.PhysicsUpdate();
+    }
+
+    private void InitStateMachine()
+    {
+        stateMachine = new EnemyStateMachine();
+        IdleState = new EnemyIdleState(this, stateMachine);
     }
     public void ApplyStats()
     {
