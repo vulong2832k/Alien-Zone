@@ -12,5 +12,4 @@ public class NormalAttackSO : EnemyAttackSO
             damage = damage
         };
     }
-
 }

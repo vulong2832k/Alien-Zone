@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-
 public class EnemyController : MonoBehaviour, IDamageable
 {
     [Header("Attributes: ")]
@@ -13,11 +12,16 @@ public class EnemyController : MonoBehaviour, IDamageable
     public EnemySO dataEnemy;
     [SerializeField] private Transform _targetPlayer;
     public Transform Target => _targetPlayer;
+
     [SerializeField] private string _enemyKey = "Enemy";
+
     [SerializeField] private EnemyStats _stats;
+    public EnemyStats stats => _stats;
 
     [Header("Components: ")]
+    public Animator anim;
     private NavMeshAgent _agent;
+    public NavMeshAgent Agent => _agent;
 
     [Header("Logic: ")]
     private bool _isAttacking = false;
@@ -28,17 +32,24 @@ public class EnemyController : MonoBehaviour, IDamageable
     public EnemyStateMachine stateMachine;
 
     public EnemyIdleState IdleState { get; private set; }
+    public EnemyMoveState MoveState { get; private set; }
+    public EnemyAttackState AttackState { get; private set; }
 
     //Event
     public event Action<EnemyController> OnEnemyDie;
 
     private void Awake()
     {
-        InitStateMachine();
         _agent = GetComponent<NavMeshAgent>();
         _stats = GetComponent<EnemyStats>();
-        _targetPlayer = FindAnyObjectByType<PlayerController>().transform;
+
+        InitStateMachine();
+
+        var player = FindAnyObjectByType<PlayerController>();
+        if (player != null)
+            _targetPlayer = player.transform;
     }
+
     private void OnEnable()
     {
         _cooldown = 0f;
@@ -48,164 +59,166 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (_agent != null)
             _agent.isStopped = false;
     }
+
     private IEnumerator Start()
     {
         yield return StartCoroutine(WaitForPlayer());
         stateMachine.Initialize(IdleState);
-        if (dataEnemy != null)
+
+        if (dataEnemy != null && _agent != null)
             _agent.speed = dataEnemy.MoveSpeed;
+
+        ApplyStats();
     }
 
     private void Update()
     {
-        CheckTypeAttack();
-        stateMachine.CurrentState.LogicUpdate();
+        if (stateMachine?.CurrentState != null)
+            stateMachine.CurrentState.LogicUpdate();
     }
+
     private void FixedUpdate()
     {
-        if (_targetPlayer != null && !_playerInRange)
-        {
-            _agent.SetDestination(_targetPlayer.position);
-
-            Vector3 moveDir = _agent.velocity.normalized;
-            if (moveDir != Vector3.zero)
-                transform.rotation = Quaternion.LookRotation(moveDir);
-        }
-        stateMachine.CurrentState.PhysicsUpdate();
+        if (stateMachine?.CurrentState != null)
+            stateMachine.CurrentState.PhysicsUpdate();
     }
 
+    #region StateMachine
     private void InitStateMachine()
     {
         stateMachine = new EnemyStateMachine();
+
         IdleState = new EnemyIdleState(this, stateMachine);
+        MoveState = new EnemyMoveState(this, stateMachine);
+        if (dataEnemy.AttackStrategy is SuicideAttackSO suicideSO)
+        {
+            AttackState = new EnemyAttackState(this, stateMachine, suicideSO);
+        }
     }
+    public void PlayAnim(string nameState)
+    {
+        if (anim != null)
+            anim.Play(nameState);
+    }
+    #endregion
+    public void StopMoving()
+    {
+        if (_agent != null && _agent.enabled && _agent.isActiveAndEnabled)
+        {
+            _agent.isStopped = true;
+            _agent.ResetPath();
+        }
+    }
+    public void ResumeMoving()
+    {
+        if (_agent != null && _agent.enabled && _agent.isActiveAndEnabled)
+            _agent.isStopped = false;
+    }
+    #region AttackType
+    public void OnAttackHit()
+    {
+        if (!IsAlive || Target == null || dataEnemy == null) return;
+
+        var result = dataEnemy.AttackStrategy?.EnemyAttack(transform, Target, _stats.Damage);
+        if (result != null && result.target != null)
+        {
+            var dmgable = result.target.GetComponent<IDamageable>();
+            dmgable?.TakeDamage(result.damage);
+        }
+    }
+    //------------------------------------------Enemy Explosion---------------------------------------------------------
+    public void DoExplosionDamage(float radius, int damage)
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, radius);
+        foreach (var hit in hits)
+        {
+            IDamageable dmg = hit.GetComponentInParent<IDamageable>();
+            dmg?.TakeDamage(damage);
+        }
+    }
+    public void SpawnExplosionEffect(string key)
+    {
+        GameObject explosionEff = MultiObjectPool.Instance.SpawnFromPool(key, transform.position, Quaternion.identity);
+
+        ParticleSystem particleSystem = explosionEff.GetComponent<ParticleSystem>();
+        float total = (particleSystem != null)
+            ? particleSystem.main.duration + particleSystem.main.startLifetime.constantMax : 1.5f;
+
+        StartCoroutine(ReturnExplosionEffect(explosionEff, total));
+    }
+    private IEnumerator ReturnExplosionEffect(GameObject explosionEffect, float timeDelay)
+    {
+        yield return new WaitForSeconds(timeDelay);
+        MultiObjectPool.Instance.ReturnToPool("ExplosionEffect", explosionEffect);
+    }
+    public void DieFromExplosion()
+    {
+        MultiObjectPool.Instance.ReturnToPool(_enemyKey, gameObject);
+    }
+    //------------------------------------------Enemy Missiler-------------------------------------------------------------
+    public void FireMissile(string bulletKey)
+    {
+        Transform firePoint = transform.Find("FirePoint");
+        if (firePoint == null) return;
+        
+        Vector3 direction = (Target.position - firePoint.position).normalized;
+
+        GameObject bulletMissile = MultiObjectPool.Instance.SpawnFromPool(bulletKey, firePoint.position, Quaternion.LookRotation(direction));
+
+        if (bulletMissile.TryGetComponent(out EnemyBulletBase script))
+        {
+            script.Init(direction, stats.Damage);
+        }
+    }
+    //------------------------------------------Enemy Ranger-------------------------------------------------------------
+    #endregion
     public void ApplyStats()
     {
-        _currentHP = _stats.HP;
+        if (_stats != null)
+            _currentHP = _stats.HP;
+
         UpdateColorEnemyByLevel();
     }
+
+    public void TakeDamage(int damage)
+    {
+        if (!IsAlive) return;
+        _currentHP -= damage;
+        if (_currentHP <= 0)
+        {
+            return;
+        }
+    }
+
+    private void Die()
+    {
+        if (!IsAlive) return;
+
+        IsAlive = false;
+        OnEnemyDie?.Invoke(this);
+
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        if (player != null && _stats != null)
+        {
+            player.AddXP(_stats.ExpReward);
+        }
+
+        EnemyLoot loot = GetComponent<EnemyLoot>();
+        loot?.DropLoot();
+
+        MultiObjectPool.Instance?.ReturnToPool(_enemyKey, gameObject);
+    }
+
     private IEnumerator WaitForPlayer()
     {
-        while(_targetPlayer == null)
+        while (_targetPlayer == null)
         {
             GameObject foundPlayer = GameObject.FindGameObjectWithTag("Player");
             if (foundPlayer != null)
-            {
                 _targetPlayer = foundPlayer.transform;
-            }
+
             yield return new WaitForSeconds(0.1f);
         }
-    }
-    private void CheckTypeAttack()
-    {
-        if (_targetPlayer == null) return;
-
-        float distance = Vector3.Distance(transform.position, _targetPlayer.position);
-        _playerInRange = distance <= dataEnemy.AttackRange;
-
-        if (_playerInRange && _targetPlayer != null)
-        {
-            Vector3 lookDir = (_targetPlayer.position - transform.position).normalized;
-            lookDir.y = 0f;
-            transform.rotation = Quaternion .LookRotation(lookDir);
-        }
-        if (_playerInRange)
-        {
-            if (!_isAttacking && _cooldown <= 0)
-            {
-                switch (dataEnemy.TypeEnemy)
-                {
-                    case TypeEnemy.normal:
-                    case TypeEnemy.Explosion:
-                        StartCoroutine(AttackMeleeRoutine());
-                        break;
-                    case TypeEnemy.ranger:
-                        StartCoroutine(AttackRangerRoutine());
-                        break;
-                    case TypeEnemy.boss:
-                        StartCoroutine(AttackBossRoutine());
-                        break;
-                }
-            }
-            else
-            {
-                StopMoving();
-            }
-        }
-        else
-        {
-            ResumeMoving();
-        }
-
-        _cooldown -= Time.deltaTime;
-    }
-
-    private IEnumerator AttackMeleeRoutine()
-    {
-        _isAttacking = true;
-        StopMoving();
-
-        AttackResult result = dataEnemy.AttackStrategy.EnemyAttack(transform, _targetPlayer, _stats.Damage);
-
-        if (result != null && result.target != null)
-        {
-            IDamageable damageable = result.target.GetComponent<IDamageable>();
-            if (damageable != null)
-            {
-                damageable.TakeDamage(result.damage);
-            }
-        }
-        _cooldown = dataEnemy.AttackCooldown;
-
-        yield return new WaitForSeconds(1f);
-        _isAttacking = false;
-    }
-    private IEnumerator AttackRangerRoutine()
-    {
-        _isAttacking = true;
-        StopMoving();
-
-        dataEnemy.AttackStrategy.EnemyAttack(transform, _targetPlayer, _stats.Damage);
-
-        _cooldown = dataEnemy.AttackCooldown;
-
-        yield return new WaitForSeconds(1f);
-        _isAttacking = false;
-    }
-    private IEnumerator AttackBossRoutine()
-    {
-        _isAttacking = true;
-        StopMoving();
-
-        dataEnemy.AttackStrategy.EnemyAttack(transform, _targetPlayer, _stats.Damage);
-
-        _cooldown = dataEnemy.AttackCooldown;
-
-        yield return new WaitForSeconds(1f);
-        _isAttacking = false;
-    }
-
-    public void StartExlosionAttackCoroutine(IEnumerator routine)
-    {
-        StartCoroutine(routine);
-    }
-    private void StopMoving()
-    {
-        if (_agent.enabled && _agent.isActiveAndEnabled)
-            _agent.isStopped = true;
-    }
-
-    private void ResumeMoving()
-    {
-        if (_agent.enabled && _agent.isActiveAndEnabled)
-            _agent.isStopped = false;
-    }
-    public void TakeDamage(int damage)
-    {
-        _currentHP -= damage;
-
-        if (_currentHP <= 0 && IsAlive)
-            Die();
     }
     private void UpdateColorEnemyByLevel()
     {
@@ -225,28 +238,16 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         renderer.material.color = color;
     }
-    private void Die()
-    {
-        if (!IsAlive) return;
 
-        IsAlive = false;
-        OnEnemyDie?.Invoke(this);
-
-        PlayerController player = FindAnyObjectByType<PlayerController>();
-        if (player != null)
-        {
-            int exp = _stats.ExpReward;
-            player.AddXP(exp);
-        }
-
-        MultiObjectPool.Instance.ReturnToPool(_enemyKey, gameObject);
-        EnemyLoot loot = GetComponent<EnemyLoot>();
-        loot?.DropLoot();
-    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, dataEnemy?.AttackRange ?? 1f);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, dataEnemy?.FollowRange ?? 0f);
     }
-    
+    public void OnDeathComplete()
+    {
+        Die();
+    }
 }

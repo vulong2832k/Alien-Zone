@@ -5,6 +5,7 @@ public class AttackResult
     public int damage;
     public Transform attacker;
     public Transform target;
+    public string extraString;
 }
 
 public abstract class EnemyAttackSO : ScriptableObject

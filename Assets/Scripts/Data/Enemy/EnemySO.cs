@@ -27,6 +27,7 @@ public class EnemySO : ScriptableObject
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _attackCooldown;
     [SerializeField] private float _attackRange;
+    [SerializeField] private float _followRange;
     [SerializeField] private TypeEnemy _typeEnemy;
     [SerializeField] private LevelEnemy _levelEnemy = LevelEnemy.Default;
     [SerializeField] private EnemyAttackSO _attackStrategy;
@@ -38,6 +39,7 @@ public class EnemySO : ScriptableObject
     public float MoveSpeed => _moveSpeed;
     public float AttackCooldown => _attackCooldown;
     public float AttackRange => _attackRange;
+    public float FollowRange => _followRange;
     public TypeEnemy TypeEnemy => _typeEnemy;
     public LevelEnemy LevelEnemy => _levelEnemy;
     public EnemyAttackSO AttackStrategy => _attackStrategy;
