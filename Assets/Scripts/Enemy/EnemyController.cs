@@ -117,14 +117,42 @@ public class EnemyController : MonoBehaviour, IDamageable
     #region AttackType
     public void OnAttackHit()
     {
-        if (!IsAlive || Target == null || dataEnemy == null) return;
+        if (!IsAlive || Target == null || dataEnemy == null)
+            return;
 
         var result = dataEnemy.AttackStrategy?.EnemyAttack(transform, Target, _stats.Damage);
-        if (result != null && result.target != null)
+        if (result == null) return;
+
+        // SUICIDE -----------------------------
+        if (dataEnemy.AttackStrategy is SuicideAttackSO suicideSO)
         {
-            var dmgable = result.target.GetComponent<IDamageable>();
-            dmgable?.TakeDamage(result.damage);
+            DoExplosionDamage(suicideSO.ExplosionRadius, result.damage);
+
+            SpawnExplosionEffect(suicideSO.ExplosionEffectKey);
+
+            DieFromExplosion();
+            return;
         }
+
+        if (dataEnemy.AttackStrategy is RangerAttackSO rangerSO)
+        {
+            FireBullet(rangerSO.BulletKey);
+            return;
+        }
+
+        if (dataEnemy.AttackStrategy is MissileAttackSO missileSO)
+        {
+            FireMissile(missileSO.MissileKey);
+            return;
+        }
+
+        var dmgable = result.target.GetComponent<IDamageable>();
+        dmgable?.TakeDamage(result.damage);
+    }
+
+    public void OnAttackEvent()
+    {
+        OnAttackHit();
     }
     //------------------------------------------Enemy Explosion---------------------------------------------------------
     public void DoExplosionDamage(float radius, int damage)
@@ -168,9 +196,23 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (bulletMissile.TryGetComponent(out EnemyBulletBase script))
         {
             script.Init(direction, stats.Damage);
-        }
+        }   
     }
     //------------------------------------------Enemy Ranger-------------------------------------------------------------
+    public void FireBullet(string bulletKey)
+    {
+        Transform firePoint = transform.Find("FirePoint");
+        if (firePoint == null) return;
+
+        Vector3 direction = (Target.position - firePoint.position).normalized;
+
+        GameObject bullet = MultiObjectPool.Instance.SpawnFromPool(bulletKey, firePoint.position, Quaternion.LookRotation(direction));
+
+        if (bullet.TryGetComponent(out EnemyBulletBase script))
+        {
+            script.Init(direction, stats.Damage);
+        }
+    }
     #endregion
     public void ApplyStats()
     {
