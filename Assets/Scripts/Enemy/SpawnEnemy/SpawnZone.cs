@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 [System.Serializable]
 public class EnemyLevelSpawn
@@ -80,24 +81,42 @@ public class SpawnZone : MonoBehaviour
     }
     private Vector3 GetRandomPointInArea()
     {
+        if (spawnArea == null)
+        {
+            Debug.LogWarning("SpawnZone: spawnArea is null", this);
+            return transform.position;
+        }
+
         Bounds bounds = spawnArea.GetComponent<BoxCollider>().bounds;
 
         float x = Random.Range(bounds.min.x, bounds.max.x);
         float z = Random.Range(bounds.min.z, bounds.max.z);
-        float y = bounds.center.y + 20f;
+        float y = bounds.max.y + 5f;
 
-        Vector3 spawnPos = new Vector3(x, y, z);
+        Vector3 rawPos = new Vector3(x, y, z);
 
-        if (Physics.Raycast(spawnPos, Vector3.down, out RaycastHit hit, Mathf.Infinity))
+        if (Physics.Raycast(rawPos, Vector3.down, out RaycastHit hit, 200f))
         {
-            if (hit.collider.CompareTag("Ground"))
-            {
-                return hit.point;
-            }
+            rawPos = hit.point;
         }
 
-        return spawnPos;
+        if (NavMesh.SamplePosition(rawPos, out NavMeshHit navHit, 8f, NavMesh.AllAreas))
+        {
+            return navHit.position;
+        }
+
+        Vector3 fallback = transform.position;
+
+        if (NavMesh.SamplePosition(fallback, out NavMeshHit navHit2, 10f, NavMesh.AllAreas))
+        {
+            return navHit2.position;
+        }
+
+        return fallback;
     }
+
+
+
     private void OnDrawGizmosSelected()
     {
         if (spawnArea != null)

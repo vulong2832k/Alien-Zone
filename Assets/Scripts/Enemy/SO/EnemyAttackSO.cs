@@ -10,5 +10,6 @@ public class AttackResult
 
 public abstract class EnemyAttackSO : ScriptableObject
 {
+    public float AttackDuration = 1f;
     public abstract AttackResult EnemyAttack(Transform enemy, Transform target, int damage);
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -34,6 +34,8 @@ public class EnemyController : MonoBehaviour, IDamageable
     public EnemyIdleState IdleState { get; private set; }
     public EnemyMoveState MoveState { get; private set; }
     public EnemyAttackState AttackState { get; private set; }
+    public EnemyHurtState HurtState { get; private set; }
+    public EnemyDeathState DeathState { get; private set; }
 
     //Event
     public event Action<EnemyController> OnEnemyDie;
@@ -55,9 +57,10 @@ public class EnemyController : MonoBehaviour, IDamageable
         _cooldown = 0f;
         _isAttacking = false;
         _playerInRange = false;
+        StartCoroutine(InitAfterSpawn());
 
-        if (_agent != null)
-            _agent.isStopped = false;
+        if (dataEnemy != null && dataEnemy.AttackStrategy != null)
+            AttackState = new EnemyAttackState(this, stateMachine, dataEnemy.AttackStrategy);
     }
 
     private IEnumerator Start()
@@ -82,7 +85,14 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (stateMachine?.CurrentState != null)
             stateMachine.CurrentState.PhysicsUpdate();
     }
-
+    private IEnumerator InitAfterSpawn()
+    {
+        yield return null;
+        if (_agent != null && _agent.isOnNavMesh)
+        {
+            _agent.isStopped = false;
+        }
+    }
     #region StateMachine
     private void InitStateMachine()
     {
@@ -90,20 +100,27 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         IdleState = new EnemyIdleState(this, stateMachine);
         MoveState = new EnemyMoveState(this, stateMachine);
-        if (dataEnemy.AttackStrategy is SuicideAttackSO suicideSO)
-        {
-            AttackState = new EnemyAttackState(this, stateMachine, suicideSO);
-        }
+        HurtState = new EnemyHurtState(this, stateMachine);
+        DeathState = new EnemyDeathState(this, stateMachine);
     }
     public void PlayAnim(string nameState)
     {
         if (anim != null)
             anim.Play(nameState);
     }
+    public bool HasAnimation(string animName)
+    {
+        foreach (var clip in anim.runtimeAnimatorController.animationClips)
+        {
+            if (clip.name == animName)
+                return true;
+        }
+        return false;
+    }
     #endregion
     public void StopMoving()
     {
-        if (_agent != null && _agent.enabled && _agent.isActiveAndEnabled)
+        if (_agent != null && _agent.enabled && _agent.isOnNavMesh)
         {
             _agent.isStopped = true;
             _agent.ResetPath();
@@ -111,7 +128,7 @@ public class EnemyController : MonoBehaviour, IDamageable
     }
     public void ResumeMoving()
     {
-        if (_agent != null && _agent.enabled && _agent.isActiveAndEnabled)
+        if (_agent != null && _agent.enabled && _agent.isOnNavMesh)
             _agent.isStopped = false;
     }
     #region AttackType
@@ -123,7 +140,6 @@ public class EnemyController : MonoBehaviour, IDamageable
         var result = dataEnemy.AttackStrategy?.EnemyAttack(transform, Target, _stats.Damage);
         if (result == null) return;
 
-        // SUICIDE -----------------------------
         if (dataEnemy.AttackStrategy is SuicideAttackSO suicideSO)
         {
             DoExplosionDamage(suicideSO.ExplosionRadius, result.damage);
@@ -153,6 +169,19 @@ public class EnemyController : MonoBehaviour, IDamageable
     public void OnAttackEvent()
     {
         OnAttackHit();
+    }
+    public void FaceTarget()
+    {
+        if (Target == null) return;
+
+        Vector3 dir = Target.position - transform.position;
+        dir.y = 0;
+
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion rot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 10f);
+        }
     }
     //------------------------------------------Enemy Explosion---------------------------------------------------------
     public void DoExplosionDamage(float radius, int damage)
@@ -228,7 +257,11 @@ public class EnemyController : MonoBehaviour, IDamageable
         _currentHP -= damage;
         if (_currentHP <= 0)
         {
-            return;
+            Die();
+        }
+        else
+        {
+            stateMachine.ChangeState(HurtState);
         }
     }
 
@@ -237,18 +270,21 @@ public class EnemyController : MonoBehaviour, IDamageable
         if (!IsAlive) return;
 
         IsAlive = false;
+
         OnEnemyDie?.Invoke(this);
 
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null && _stats != null)
-        {
             player.AddXP(_stats.ExpReward);
-        }
 
         EnemyLoot loot = GetComponent<EnemyLoot>();
         loot?.DropLoot();
 
-        MultiObjectPool.Instance?.ReturnToPool(_enemyKey, gameObject);
+        stateMachine.ChangeState(DeathState);
+    }
+    public void OnDeathComplete()
+    {
+        MultiObjectPool.Instance.ReturnToPool(_enemyKey, gameObject);
     }
 
     private IEnumerator WaitForPlayer()
@@ -288,8 +324,5 @@ public class EnemyController : MonoBehaviour, IDamageable
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, dataEnemy?.FollowRange ?? 0f);
     }
-    public void OnDeathComplete()
-    {
-        Die();
-    }
+    
 }

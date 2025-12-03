@@ -40,20 +40,29 @@ public class MultiObjectPool : MonoBehaviour
     public GameObject SpawnFromPool(string key, Vector3 position, Quaternion rotation)
     {
         if (!_poolDict.ContainsKey(key))
-        {
             return null;
+
+        var obj = _poolDict[key].Dequeue();
+
+        obj.SetActive(false);
+
+        obj.transform.position = position;
+        obj.transform.rotation = rotation;
+
+        obj.SetActive(true);
+
+        var agent = obj.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.enabled = false;
+            agent.enabled = true;
         }
 
-        var objectToSpawn = _poolDict[key].Dequeue();
-
-        objectToSpawn.SetActive(true);
-        objectToSpawn.transform.position = position;
-        objectToSpawn.transform.rotation = rotation;
-
-        _poolDict[key].Enqueue(objectToSpawn);
-
-        return objectToSpawn;
+        _poolDict[key].Enqueue(obj);
+        return obj;
     }
+
+
 
     public void ReturnToPool(string key, GameObject obj)
     {
