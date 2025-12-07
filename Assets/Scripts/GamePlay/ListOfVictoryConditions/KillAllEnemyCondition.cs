@@ -19,4 +19,16 @@ public class KillAllEnemiesCondition : MonoBehaviour, IWinCondition
         }
         return true;
     }
+
+    public string GetDescription()
+    {
+        int total = 0, killed = 0;
+        foreach (var z in _zones)
+        {
+            total += z.TotalEnemies;
+            killed += z.KilledEnemies;
+        }
+
+        return $"Kill All Enemies: {killed} / {total}";
+    }
 }

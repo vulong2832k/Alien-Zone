@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-
-
 public class WeaponSwitching : MonoBehaviour
 {
     public static class WeaponEvents
@@ -25,8 +22,6 @@ public class WeaponSwitching : MonoBehaviour
             Transform gunSlots = transform.Find("Head/Gun");
             if (gunSlots != null)
                 _gunParent = gunSlots;
-            else
-                Debug.LogError("Không tìm thấy GunSlots trong Player!");
         }
 
         _equippedGuns.Clear();
@@ -37,7 +32,6 @@ public class WeaponSwitching : MonoBehaviour
             _equippedGuns.Add(gun);
         }
 
-        // Gán switchImage nếu chưa có
         if (_switchImage == null)
             _switchImage = FindAnyObjectByType<SwitchImage>();
     }
@@ -73,6 +67,7 @@ public class WeaponSwitching : MonoBehaviour
         }
     }
 
+
     private void HandleScrollInput()
     {
         if (_equippedGuns.Count == 0) return;
@@ -94,22 +89,22 @@ public class WeaponSwitching : MonoBehaviour
     #region Weapon Functions
     public void ShowWeapon(int index)
     {
-        if (_gunParent == null || _equippedGuns.Count == 0) return;
+        if (_equippedGuns.Count == 0) return;
         if (index < 0 || index >= _equippedGuns.Count) return;
 
-        for (int i = 0; i < _gunParent.childCount; i++)
-        {
-            Transform slot = _gunParent.GetChild(i);
-            if (slot.childCount == 0) continue;
+        foreach (var gun in _equippedGuns)
+            if (gun != null)
+                gun.gameObject.SetActive(false);
 
-            for (int j = 0; j < slot.childCount; j++)
-                slot.GetChild(j).gameObject.SetActive(i == index);
-        }
+        // Bật đúng súng
+        CurrentGun = _equippedGuns[index];
+        if (CurrentGun != null)
+            CurrentGun.gameObject.SetActive(true);
 
         _currentIndex = index;
-        UpdateUI();
-        CurrentGun = _equippedGuns[_currentIndex];
+
         WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
+        UpdateUI();
     }
 
     public GunController SpawnAndEquipWeapon(int slotIndex, GunAttributes gunAttributes, bool showImmediately = false)
@@ -147,7 +142,7 @@ public class WeaponSwitching : MonoBehaviour
         else
         {
             CurrentGun = _equippedGuns[slotIndex];
-            WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
+            //WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
             UpdateUI();
         }
 

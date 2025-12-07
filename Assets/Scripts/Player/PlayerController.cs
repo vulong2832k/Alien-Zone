@@ -100,6 +100,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     public PlayerNoneActionState NoneActionState;
     public PlayerReloadState ReloadState;
 
+    public bool IsActionLocked;
+
     [Header("Interactable: ")]
     public IInteractable CurrentInteractable { get; private set; }
 
@@ -125,8 +127,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         if (_weaponSwitching == null)
             _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
 
-        if (_weaponSwitching != null)
-            Gun = _weaponSwitching.CurrentGun;
+        WeaponEvents.OnWeaponChanged += OnGunChanged;
 
         InitAttributes();
         GetComponentWhenStart();
@@ -137,12 +138,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     void Start()
     {
-        Gun = _weaponSwitching.CurrentGun;
-        if (Gun != null)
-        {
-            WeaponEvents.OnWeaponChanged?.Invoke(Gun);
-        }
-
         _healRoutine = StartCoroutine(HealOverTime());
         InitStateMachine();
         OnHealthChanged?.Invoke(_currentHP, _maxHP);

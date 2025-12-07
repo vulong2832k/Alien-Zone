@@ -8,9 +8,11 @@ public class PlayerReloadState : PlayerActionState
 
     public override void Enter()
     {
+        base.Enter();
+        _player.IsActionLocked = true;
+
         if (_player.Gun == null)
         {
-            Debug.LogError("ReloadState → _player.Gun NULL!");
             _actionState.ChangeState(_player.NoneActionState);
             return;
         }
@@ -26,6 +28,7 @@ public class PlayerReloadState : PlayerActionState
     public override void Exit()
     {
         _player.Gun.BlockFire = false;
+        _player.IsActionLocked = false;
     }
 
     private string GetReloadAnimation()
@@ -58,5 +61,4 @@ public class PlayerReloadState : PlayerActionState
         _player.Gun.DoReload();
         _actionState.ChangeState(_player.NoneActionState);
     }
-
 }

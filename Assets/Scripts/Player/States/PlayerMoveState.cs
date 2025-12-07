@@ -25,6 +25,8 @@ public class PlayerMoveState : PlayerState
 
     public override void HandleInput()
     {
+        if (_player.IsActionLocked) return;
+
         if (_player.JumpPressed && _player.IsGrounded())
         {
             _state.ChangeState(_player.JumpState);

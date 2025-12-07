@@ -2,83 +2,60 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AmmoUI : MonoBehaviour, IAmmoObserver
+public class AmmoUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _ammoText;
-    [SerializeField] private Image _ammoImage;
+    [SerializeField] private Image _cooldownImage;
 
-    private GunController _gun;
+    [SerializeField] private GunController _currentGun;
 
     private void OnEnable()
     {
-        WeaponEvents.OnWeaponChanged += OnWeaponChanged;
+        WeaponEvents.OnWeaponChanged += HandleWeaponChanged;
 
-        if (PlayerController.Instance != null && PlayerController.Instance.Gun != null)
+        var player = PlayerController.Instance;
+        if (player != null && player.Gun != null)
         {
-            OnWeaponChanged(PlayerController.Instance.Gun);
-        }
-    }
 
+        }
+            //HandleWeaponChanged(player.Gun);
+        else
+            ClearUI();
+    }
 
     private void OnDisable()
     {
-        WeaponEvents.OnWeaponChanged -= OnWeaponChanged;
-        UnsubscribeFromGun();
+        WeaponEvents.OnWeaponChanged -= HandleWeaponChanged;
+        UnsubscribeGun();
     }
-    private void Awake()
+
+    private void HandleWeaponChanged(GunController newGun)
     {
-        if (_ammoText == null)
+        UnsubscribeGun();
+        _currentGun = newGun;
+
+        if (_currentGun == null)
         {
-            GameObject ammoTextObj = GameObject.Find("AmmoText");
-            if (ammoTextObj != null)
-                _ammoText = ammoTextObj.GetComponent<TextMeshProUGUI>();
+            ClearUI();
+            return;
         }
 
-        if (_ammoImage == null)
-        {
-            GameObject ammoImgObj = GameObject.Find("AmmoImage");
-            if (ammoImgObj != null)
-                _ammoImage = ammoImgObj.GetComponent<Image>();
-        }
+        _currentGun.OnAmmoChanged += UpdateAmmoUI;
+
+        UpdateAmmoUI(_currentGun.CurrentAmmo, _currentGun.ReserveAmmo, false);
+        UpdateCooldownUI();
     }
-    private void OnWeaponChanged(GunController newGun)
+
+    private void UnsubscribeGun()
     {
-        Debug.Log("AmmoUI: OnWeaponChanged called with " + (newGun ? newGun.name : "null"));
-
-        UnsubscribeFromGun();
-
-        _gun = newGun;
-
-        if (_gun != null)
+        if (_currentGun != null)
         {
-            _gun.OnAmmoChanged += OnAmmoChanged;
-            OnAmmoChanged(_gun.CurrentAmmo, _gun.ReserveAmmo, false);
-            if (_ammoImage != null) _ammoImage.fillAmount = _gun.FireCooldownNormalized;
-        }
-        else
-        {
-            UpdateUI(0, 0, false);
-            if (_ammoImage != null) _ammoImage.fillAmount = 0f;
+            _currentGun.OnAmmoChanged -= UpdateAmmoUI;
+            _currentGun = null;
         }
     }
-    private void UnsubscribeFromGun()
-    {
-        if (_gun != null)
-        {
-            _gun.OnAmmoChanged -= OnAmmoChanged;
-            _gun = null;
-        }
-    }
-    public void OnAmmoChanged(int currentAmmo, int reserveAmmo, bool isReloading)
-    {
-        UpdateUI(currentAmmo, reserveAmmo, isReloading);
 
-        if (_ammoImage != null && _gun != null)
-        {
-            _ammoImage.fillAmount = _gun.FireCooldownNormalized;
-        }
-    }
-    private void UpdateUI(int currentAmmo, int reserveAmmo, bool isReloading)
+    private void UpdateAmmoUI(int current, int reserve, bool isReloading)
     {
         if (_ammoText == null) return;
 
@@ -89,9 +66,25 @@ public class AmmoUI : MonoBehaviour, IAmmoObserver
         }
         else
         {
-            _ammoText.text = $"{currentAmmo:D3} / {reserveAmmo:D3}";
-            _ammoText.color = (currentAmmo == 0 && reserveAmmo == 0) ? Color.red : Color.white;
+            _ammoText.text = $"{current:D3} / {reserve:D3}";
+            _ammoText.color = (current == 0 && reserve == 0) ? Color.red : Color.white;
         }
+
+        UpdateCooldownUI();
     }
-    
+
+    private void UpdateCooldownUI()
+    {
+        if (_cooldownImage != null && _currentGun != null)
+            _cooldownImage.fillAmount = _currentGun.FireCooldownNormalized;
+    }
+
+    private void ClearUI()
+    {
+        if (_ammoText != null)
+            _ammoText.text = "--- / ---";
+
+        if (_cooldownImage != null)
+            _cooldownImage.fillAmount = 0f;
+    }
 }

@@ -88,10 +88,6 @@ public class GunController : MonoBehaviour
         {
             AddReserveAmmo(10);
         }
-        //if (Input.GetKeyDown(KeyCode.R))
-        //{
-        //    TryReload();
-        //}
     }
 
     private void SetTypeShoot()

@@ -2,9 +2,9 @@
 
 public class PlayerJumpState : PlayerState
 {
-    private float _groundedRemember = 0.1f; //Check time in ground
+    private float _groundedRemember = 0.1f;
     private float _groundedTimer;
-    private float _minJumpTime = 0.7f; // Time animation
+    private float _minJumpTime = 0.7f;
     private float _jumpTimer;
 
     public PlayerJumpState(PlayerController player, PlayerStateMachine state) : base(player, state) { }

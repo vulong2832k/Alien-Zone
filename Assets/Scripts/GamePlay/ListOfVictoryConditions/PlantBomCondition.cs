@@ -45,4 +45,9 @@ public class PlantBomCondition : MonoBehaviour, IWinCondition
         }
         return false;
     }
+
+    public string GetDescription()
+    {
+        return $"Plant Bom: {_plantedCount} / {_totalZones}";
+    }
 }

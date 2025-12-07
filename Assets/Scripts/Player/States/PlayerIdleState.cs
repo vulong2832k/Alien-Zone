@@ -22,6 +22,10 @@ public class PlayerIdleState : PlayerState
     }
     public override void HandleInput()
     {
+        _player.RotateToCameraDirection();
+
+        if (_player.IsActionLocked) return;
+
         if (_player.ReloadPressed)
         {
             _player.ReloadPressed = false;

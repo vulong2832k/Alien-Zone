@@ -6,9 +6,20 @@ public class PlayerCrouchWalkState : PlayerState
     public override void Enter()
     {
         _player.SetCrouch(true);
-        _player.Animator.Play("P_Global_CrouchWalk");
+        _player.PlayGunBasedAnimation(
+            "P_Global_CrouchWalk",
+            "P_Pistol_CrouchWalk",
+            "P_Rifle_CrouchWalk"
+        );
     }
-
+    public override void OnGunChanged()
+    {
+        _player.PlayGunBasedAnimation(
+            "P_Global_CrouchWalk",
+            "P_Pistol_CrouchWalk",
+            "P_Rifle_CrouchWalk"
+        );
+    }
     public override void HandleInput()
     {
         if (!_player.IsCrouching)
@@ -32,6 +43,8 @@ public class PlayerCrouchWalkState : PlayerState
 
     public override void Update()
     {
+        if (_player.IsActionLocked) return;
+
         _player.PlayerMovement();
         _player.RotateToCameraDirection();
     }

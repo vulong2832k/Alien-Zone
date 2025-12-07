@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class WeaponCrate : MonoBehaviour, IInteractable
@@ -9,22 +9,23 @@ public class WeaponCrate : MonoBehaviour, IInteractable
     [SerializeField] private bool _isMissionCrate = false;
     [SerializeField] private MonoBehaviour _winConditionRef;
 
+    [Header("Item Settings")]
+    [SerializeField] private ItemSO _itemReward;
+    [SerializeField] private int _amount = 1;
+
     private IWinCondition _winCondition;
     private bool _opened = false;
 
     void Awake()
     {
         _animator = GetComponent<Animator>();
-         
+
         if (_isMissionCrate && _winConditionRef != null)
-        {
             _winCondition = _winConditionRef as IWinCondition;
-        }
         else if (_isMissionCrate)
-        {
             _winCondition = FindFirstObjectByType<FindSecretsCondition>();
-        }
     }
+
     public void Interact(PlayerController player)
     {
         if (_opened) return;
@@ -33,6 +34,14 @@ public class WeaponCrate : MonoBehaviour, IInteractable
         _animator.SetBool("Open", true);
         StartCoroutine(AutoClose());
 
+        // 1. Add Item to Player Inventory (nếu có item)
+        if (_itemReward != null)
+        {
+            //player.Inventory.AddItem(_itemReward, _amount); Bug nè. fix sau nha
+            Debug.Log($"Player nhận item: {_itemReward.name} x{_amount}");
+        }
+
+        // 2. Update Mission Condition nếu đây là thùng nhiệm vụ
         if (_isMissionCrate && _winCondition != null)
         {
             if (_winCondition is FindSecretsCondition secretCondition)
@@ -42,6 +51,7 @@ public class WeaponCrate : MonoBehaviour, IInteractable
             }
         }
     }
+
     private IEnumerator AutoClose()
     {
         yield return new WaitForSeconds(4f);

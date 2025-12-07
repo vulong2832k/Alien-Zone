@@ -29,6 +29,12 @@ public class SpawnZone : MonoBehaviour
     private List<EnemyController> _enemies = new List<EnemyController>();
     public bool IsCleared { get; private set; } = false;
 
+    private int _totalEnemies = 0;
+    private int _killedEnemies = 0;
+
+    public int TotalEnemies => _totalEnemies;
+    public int KilledEnemies => _killedEnemies;
+
     private void Awake()
     {
         GetComponent<BoxCollider>().isTrigger = true;
@@ -45,6 +51,8 @@ public class SpawnZone : MonoBehaviour
     private void SpawnEnemies()
     {
         IsCleared = false;
+        _totalEnemies = 0;
+        _killedEnemies = 0;
 
         foreach (var info in spawnList)
         {
@@ -52,6 +60,7 @@ public class SpawnZone : MonoBehaviour
             {
                 for (int i = 0; i < levelInfo.count; i++)
                 {
+                    _totalEnemies++;
                     Vector3 pos = GetRandomPointInArea();
                     GameObject enemy = MultiObjectPool.Instance.SpawnFromPool(info.poolKey, pos, Quaternion.identity);
                     if (enemy == null) continue;
@@ -73,6 +82,7 @@ public class SpawnZone : MonoBehaviour
     {
         enemy.OnEnemyDie -= HandleEnemyDie;
         _enemies.Remove(enemy);
+        _killedEnemies++;
 
         if (_enemies.Count == 0)
         {

@@ -19,7 +19,6 @@
 
     public void Initialize()
     {
-        //CurrentState = _globalState;
         CurrentState.Enter();
     }
     public void Update()

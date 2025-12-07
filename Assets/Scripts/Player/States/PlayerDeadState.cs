@@ -13,7 +13,6 @@ public class PlayerDeadState : PlayerState
             _player.PlayerRb.linearVelocity = Vector3.zero;
             _player.PlayerRb.isKinematic = true;
         }
-        //Cancle animation khác
         _player.ActionStateMachine.CurrentState?.Exit();
 
         if (_player.Animator != null)

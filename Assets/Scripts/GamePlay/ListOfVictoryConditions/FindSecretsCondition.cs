@@ -19,4 +19,8 @@ public class FindSecretsCondition : MonoBehaviour, IWinCondition
     {
         _foundSecrets++;
     }
+    public string GetDescription()
+    {
+        return $"Find All Secrets: {_foundSecrets} / {_totalSecretsCompleted} ";
+    }
 }

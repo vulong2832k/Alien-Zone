@@ -23,4 +23,8 @@ public class CollectItemsCondition : MonoBehaviour, IWinCondition
         return _collected >= _requiredItemCollect;
     }
 
+    public string GetDescription()
+    {
+        return $"Collect Items: {_itemCollect} / {_requiredItemCollect}";
+    }
 }

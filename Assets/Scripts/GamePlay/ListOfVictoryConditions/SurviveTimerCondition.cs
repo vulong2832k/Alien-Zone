@@ -4,6 +4,7 @@ public class SurviveTimerCondition : MonoBehaviour, IWinCondition
 {
     [SerializeField] private float _timeCompleted;
     private float _timer = 0;
+
     public void StartCondition()
     {
         _timer = 0f;
@@ -14,4 +15,8 @@ public class SurviveTimerCondition : MonoBehaviour, IWinCondition
         return _timer >= _timeCompleted;
     }
 
+    public string GetDescription()
+    {
+        return $"Survival: {_timer} / {_timeCompleted}";
+    }
 }
