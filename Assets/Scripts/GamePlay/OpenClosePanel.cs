@@ -41,8 +41,12 @@ public class OpenClosePanel : MonoBehaviour
 
     private void OpenClosePlayerSystem()
     {
-        _isOpen = !_isOpen;
+        if (_playerSystem == null)
+        {
+            return;
+        }
 
+        _isOpen = !_isOpen;
         _playerSystem.SetActive(_isOpen);
 
         if (_isOpen)
@@ -61,4 +65,5 @@ public class OpenClosePanel : MonoBehaviour
             Time.timeScale = 1f;
         }
     }
+
 }

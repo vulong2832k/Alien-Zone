@@ -19,7 +19,6 @@ public class PlayerDeadState : PlayerState
         {
             _player.Animator.Play("P_Global_Death");
         }
-        _player.StartCoroutine(DisablePlayerAfterDelay(3f));
     }
 
     public override void Exit()
@@ -38,10 +37,5 @@ public class PlayerDeadState : PlayerState
 
     public override void FixedUpdate()
     {
-    }
-    private IEnumerator DisablePlayerAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        _player.gameObject.SetActive(false);
     }
 }

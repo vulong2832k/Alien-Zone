@@ -19,6 +19,23 @@ public class EnemyAttackState : EnemyState
     {
         base.Enter();
 
+        if (_enemy.Target != null)
+        {
+            var player = _enemy.Target.GetComponent<PlayerController>();
+            if (player != null && player.IsDead)
+            {
+                foreach (var e in Object.FindObjectsOfType<EnemyController>())
+                {
+                    if (e.Target != null)
+                        e.ClearTarget();
+                }
+
+                _state.ChangeState(_enemy.IdleState);
+                return;
+            }
+        }
+
+
         _enemy.StopMoving();
         _enemy.PlayAnim("E_Attack");
 
@@ -36,6 +53,22 @@ public class EnemyAttackState : EnemyState
     {
         base.LogicUpdate();
 
+        if (_enemy.Target != null)
+        {
+            var player = _enemy.Target.GetComponent<PlayerController>();
+            if (player != null && player.IsDead)
+            {
+                foreach (var e in Object.FindObjectsOfType<EnemyController>())
+                {
+                    if (e.Target != null)
+                        e.ClearTarget();
+                }
+
+                _state.ChangeState(_enemy.IdleState);
+                return;
+            }
+        }
+
         if (!(_attackSO is SuicideAttackSO))
         {
             _enemy.FaceTarget();
@@ -51,6 +84,7 @@ public class EnemyAttackState : EnemyState
             _state.ChangeState(_enemy.IdleState);
         }
     }
+
 
     private IEnumerator ExplosionCoroutine(SuicideAttackSO suicideSO)
     {

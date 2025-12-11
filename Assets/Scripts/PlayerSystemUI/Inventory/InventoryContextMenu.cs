@@ -27,6 +27,7 @@ public class InventoryContextMenu : MonoBehaviour
 
     private void Update()
     {
+        if (rightClickMenu == null) return;
         // Khi menu đang bật và người chơi click chuột trái
         if (rightClickMenu.activeSelf && Input.GetMouseButtonDown(0))
         {

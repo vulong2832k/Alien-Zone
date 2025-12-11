@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -140,6 +141,12 @@ public class EnemyController : MonoBehaviour, IDamageable
         var result = dataEnemy.AttackStrategy?.EnemyAttack(transform, Target, _stats.Damage);
         if (result == null) return;
 
+        if (dataEnemy.AttackStrategy is NormalAttackSO)
+        {
+            SpawnMeleeHitBox();
+            return;
+        }
+
         if (dataEnemy.AttackStrategy is SuicideAttackSO suicideSO)
         {
             DoExplosionDamage(suicideSO.ExplosionRadius, result.damage);
@@ -164,6 +171,17 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         var dmgable = result.target.GetComponent<IDamageable>();
         dmgable?.TakeDamage(result.damage);
+    }
+    public void SpawnMeleeHitBox()
+    {
+        Transform attackPoint = transform.Find("AttackPoint");
+        Debug.Log("AttackPoint = " + attackPoint);
+        GameObject hitBox = MultiObjectPool.Instance.SpawnFromPool("EnemyHitBox", attackPoint.position, attackPoint.rotation);
+
+        if (hitBox.TryGetComponent(out DamageBox box))
+        {
+            box.Init(this, stats.Damage, 0.2f);
+        }
     }
 
     public void OnAttackEvent()
@@ -210,6 +228,8 @@ public class EnemyController : MonoBehaviour, IDamageable
     }
     public void DieFromExplosion()
     {
+        DOTween.Kill(transform);
+        transform.localScale = Vector3.one;
         MultiObjectPool.Instance.ReturnToPool(_enemyKey, gameObject);
     }
     //------------------------------------------Enemy Missiler-------------------------------------------------------------
@@ -241,6 +261,10 @@ public class EnemyController : MonoBehaviour, IDamageable
         {
             script.Init(direction, stats.Damage);
         }
+    }
+    public void ClearTarget()
+    {
+        _targetPlayer = null;
     }
     #endregion
     public void ApplyStats()

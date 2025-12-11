@@ -10,12 +10,15 @@ public class HUDQuestComplete : MonoBehaviour
 
     private void Start()
     {
-        _condition = _conditionsObject.GetComponent<IWinCondition>();
+        if (_conditionsObject != null)
+            _condition = _conditionsObject.GetComponent<IWinCondition>();
     }
 
     private void Update()
     {
-        if (_condition != null)
-            _questText.text = _condition.GetDescription();
+        if (_condition == null || _questText == null)
+            return;
+
+        _questText.text = _condition.GetDescription();
     }
 }

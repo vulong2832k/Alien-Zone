@@ -14,8 +14,14 @@ public class EquipmentSystem : MonoBehaviour
     }
     public EquipmentSlotUI GetSlot(ItemType type)
     {
-        return _slots.Find(slot => slot.AllowedType == type);
+        if (_slots == null || _slots.Count == 0)
+        {
+            return null;
+        }
+
+        return _slots.Find(slot => slot != null && slot.AllowedType == type);
     }
+
 
     public List<EquipmentSlotUI> GetAllSlots()
     {

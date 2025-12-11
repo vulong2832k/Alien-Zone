@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private IWinCondition[] _winConditions;
+    [SerializeField] private ExitZone _exitZone;
 
     public bool IsGameOver {  get; private set; }
     public bool IsVictory { get; private set; }
@@ -26,6 +27,7 @@ public class GameManager : MonoBehaviour
                 if (condition.IsCompleted())
                 {
                     VictoryGame();
+                    _exitZone.ActivateExitZone();
                     Debug.Log("YOU WIN!");
                     break;
                 }
@@ -39,6 +41,7 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F5))
         {
+            Time.timeScale = 1f;
             Scene currentScene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(currentScene.buildIndex);
         }

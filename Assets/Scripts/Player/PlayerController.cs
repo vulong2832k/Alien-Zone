@@ -4,9 +4,12 @@ using DG.Tweening;
 using System.Collections;
 using Random = UnityEngine.Random;
 
+
 public class PlayerController : MonoBehaviour, IDamageable
 {
     public static PlayerController Instance { get; private set; }
+
+    public System.Action OnPlayerDead;
 
     [SerializeField] private int _maxHP;
     [SerializeField] private int _currentHP;
@@ -15,6 +18,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private float _healRecoveryTotal;
     public int MaxHP => _maxHP;
     public int CurrentHP => _currentHP;
+
+    public bool IsDead { get; private set; }
 
     [Header("Move: ")]
     [SerializeField] private float _moveSpeed = 5f;
@@ -57,6 +62,15 @@ public class PlayerController : MonoBehaviour, IDamageable
     private CapsuleCollider _collider;
     public bool IsCrouching { get; set; }
 
+    [Header("Effect Flash: ")]
+    [SerializeField] private CanvasGroup _hurtFlash;
+    [SerializeField] private float _flashDuration = 0.15f;
+    [SerializeField] private float _flashAlpha = 0.6f;
+
+    [SerializeField] private CanvasGroup _deathFlash;
+    [SerializeField] private float _deathFlashDuration = 1.5f;
+    [SerializeField] private float deathFlashHoldTime = 3f;
+
     [Header("Level System: ")]
     private int _currentLevel = 1;
     private int _currentXP = 0;
@@ -80,6 +94,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     private float _turnSmoothVelocity;  
 
     private GunStateMachine _gunStateMachine;
+
+    public InventorySystem Inventory { get; private set; }
 
     [Header("Coroutine: ")]
     private Coroutine _healRoutine;
@@ -127,8 +143,6 @@ public class PlayerController : MonoBehaviour, IDamageable
         if (_weaponSwitching == null)
             _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
 
-        WeaponEvents.OnWeaponChanged += OnGunChanged;
-
         InitAttributes();
         GetComponentWhenStart();
         InitActionState();
@@ -138,6 +152,12 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     void Start()
     {
+        if (_hurtFlash == null)
+        {
+            var hs = FindAnyObjectByType<HurtScreen>();
+            if (hs != null)
+                _hurtFlash = hs.HurtFlash;
+        }
         _healRoutine = StartCoroutine(HealOverTime());
         InitStateMachine();
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
@@ -382,11 +402,43 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
 
+        HurtFlash();
+
         if (_currentHP <= 0)
         {
+            IsDead = true;
+            IsActionLocked = true;
+            OnPlayerDead?.Invoke();
+            Time.timeScale = 0.3f;
+            DeathFlash();
             if (_healRoutine != null) StopCoroutine(_healRoutine);
             StateMachine.ChangeState(DeadState);
         }
+    }
+    private void HurtFlash()
+    {
+        if (_hurtFlash == null) return;
+
+        _hurtFlash.DOKill();
+        _hurtFlash.alpha = _flashAlpha;
+
+        _hurtFlash.DOFade(0f, _flashDuration);
+    }
+    public void DeathFlash()
+    {
+        if (_deathFlash == null) return;
+
+        _deathFlash.DOKill();
+        _deathFlash.alpha = 0;
+
+        _deathFlash.DOFade(1f, 0.1f)
+            .OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(deathFlashHoldTime, () =>
+                {
+                    _deathFlash.DOFade(0f, _deathFlashDuration);
+                });
+            });
     }
     private IEnumerator HealOverTime()
     {
@@ -403,7 +455,6 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
         }
     }
-
     #region LevelSystem
     public void AddXP(int amount)
     {
@@ -439,8 +490,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         currentGun.AddReserveAmmo(addAmount);
         WeaponEvents.OnWeaponChanged?.Invoke(currentGun);
-
-        Debug.Log($"Đã hồi {addAmount} đạn cho {currentGun.name} ({randomPercent * 100f:F1}%)");
     }
 
     private void TryUseAmmo()

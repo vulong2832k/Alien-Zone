@@ -48,7 +48,6 @@ public class WeaponSwitching : MonoBehaviour
         HandleNumberKeyInput();
         HandleScrollInput();
     }
-
     #region Input
     private void HandleNumberKeyInput()
     {
@@ -142,7 +141,6 @@ public class WeaponSwitching : MonoBehaviour
         else
         {
             CurrentGun = _equippedGuns[slotIndex];
-            //WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
             UpdateUI();
         }
 

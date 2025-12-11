@@ -247,6 +247,7 @@ GameObject:
   - component: {fileID: 5325236546529710175}
   - component: {fileID: 2927493817731594478}
   - component: {fileID: 1283238824822085287}
+  - component: {fileID: 916844193220554882}
   m_Layer: 0
   m_Name: WeaponCrate
   m_TagString: Crate
@@ -313,6 +314,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.046877, y: 0.50424105, z: 2.7815442}
   m_Center: {x: -0.037539482, y: 0.24787948, z: 0.21339631}
+--- !u!114 &916844193220554882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5583112733608540725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6c5ca3adaee3d40b4ffa8f99f84cc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isMissionCrate: 0
+  _winConditionRef: {fileID: 0}
+  _itemReward: {fileID: 0}
+  _amount: 1
 --- !u!1 &8335440290322604452
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +340,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8788481829991886710}
   - component: {fileID: 3415879246108607770}
-  - component: {fileID: 7651546682134188717}
   m_Layer: 0
   m_Name: Crate
   m_TagString: Crate
@@ -368,20 +384,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.169817, y: 0.65148234, z: 1}
   m_Center: {x: -0.07594395, y: 0.30595732, z: 0}
---- !u!114 &7651546682134188717
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8335440290322604452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd6c5ca3adaee3d40b4ffa8f99f84cc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isMissionCrate: 0
-  _winConditionRef: {fileID: 0}
 --- !u!1 &8711117804659318120
 GameObject:
   m_ObjectHideFlags: 0

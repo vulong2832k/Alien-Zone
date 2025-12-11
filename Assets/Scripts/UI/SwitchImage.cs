@@ -54,6 +54,8 @@ public class SwitchImage : MonoBehaviour
     {
         for (int i = 0; i < _presetWeaponIcons.Count; i++)
         {
+            if (_presetWeaponIcons[i] == null) continue;
+
             _presetWeaponIcons[i].sprite = null;
             _presetWeaponIcons[i].color = _inactiveColor;
         }
@@ -77,7 +79,8 @@ public class SwitchImage : MonoBehaviour
                 _presetWeaponIcons[i].sprite = sprite;
             }
 
-            _weaponImages.Add(_presetWeaponIcons[i]);
+            if (_presetWeaponIcons[i] != null)
+                _weaponImages.Add(_presetWeaponIcons[i]);
         }
     }
 

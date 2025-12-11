@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,18 +19,29 @@ public class HUDItemSp : MonoBehaviour
 
     private void Awake()
     {
-        if (_imageItemMedicine == null || _imageItemGrenade == null || _imageItemAmmo == null || _textItemMedicine == null || _textItemGrenade == null || _textItemAmmo == null)
-        {
+        if (_imageItemMedicine == null)
             _imageItemMedicine = GameObject.Find("ImageItemMedkit").GetComponent<Image>();
+
+        if (_imageItemGrenade == null)
             _imageItemGrenade = GameObject.Find("ImageItemGrenade").GetComponent<Image>();
-            _imageItemGrenade = GameObject.Find("ImageItemAmmo").GetComponent<Image>();
+
+        if (_imageItemAmmo == null)
+            _imageItemAmmo = GameObject.Find("ImageItemAmmo").GetComponent<Image>();
+
+        if (_textItemMedicine == null)
             _textItemMedicine = GameObject.Find("TextItemMedkit").GetComponent<TextMeshProUGUI>();
+
+        if (_textItemGrenade == null)
             _textItemGrenade = GameObject.Find("TextItemGrenade").GetComponent<TextMeshProUGUI>();
-            _textItemGrenade = GameObject.Find("TextItemAmmo").GetComponent<TextMeshProUGUI>();
-        }
+
+        if (_textItemAmmo == null)
+            _textItemAmmo = GameObject.Find("TextItemAmmo").GetComponent<TextMeshProUGUI>();
+
     }
-    private void Start()
+    private IEnumerator Start()
     {
+        yield return null;
+
         var medicineSlot = EquipmentSystem.Instance.GetSlot(ItemType.Medicine);
         var grenadeSlot = EquipmentSystem.Instance.GetSlot(ItemType.Grenade);
         var ammoSlot = EquipmentSystem.Instance.GetSlot(ItemType.Ammo);

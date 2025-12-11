@@ -1,6 +1,13 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class CrateItemEntry
+{
+    public ItemSO item;
+    public int amount = 1;
+}
 public class WeaponCrate : MonoBehaviour, IInteractable
 {
     private Animator _animator;
@@ -9,9 +16,8 @@ public class WeaponCrate : MonoBehaviour, IInteractable
     [SerializeField] private bool _isMissionCrate = false;
     [SerializeField] private MonoBehaviour _winConditionRef;
 
-    [Header("Item Settings")]
-    [SerializeField] private ItemSO _itemReward;
-    [SerializeField] private int _amount = 1;
+    [Header("Reward Items")]
+    [SerializeField] private List<CrateItemEntry> _rewards = new List<CrateItemEntry>();
 
     private IWinCondition _winCondition;
     private bool _opened = false;
@@ -34,14 +40,17 @@ public class WeaponCrate : MonoBehaviour, IInteractable
         _animator.SetBool("Open", true);
         StartCoroutine(AutoClose());
 
-        // 1. Add Item to Player Inventory (nếu có item)
-        if (_itemReward != null)
+        // Add ALL items in list
+        foreach (var entry in _rewards)
         {
-            //player.Inventory.AddItem(_itemReward, _amount); Bug nè. fix sau nha
-            Debug.Log($"Player nhận item: {_itemReward.name} x{_amount}");
+            if (entry.item == null || entry.amount <= 0)
+                continue;
+
+            SpawnPlayer.PlayerInventory.AddItem(entry.item, entry.amount);
+            Debug.Log($"Player nhận: {entry.item.name} x{entry.amount}");
         }
 
-        // 2. Update Mission Condition nếu đây là thùng nhiệm vụ
+        // Mission
         if (_isMissionCrate && _winCondition != null)
         {
             if (_winCondition is FindSecretsCondition secretCondition)
