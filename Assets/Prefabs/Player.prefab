@@ -4991,6 +4991,12 @@ MonoBehaviour:
   _body: {fileID: 585225569561656141}
   _crouchSpeed: 2.5
   _crouchYScale: 0.7
+  _hurtFlash: {fileID: 0}
+  _flashDuration: 0.15
+  _flashAlpha: 0.6
+  _deathFlash: {fileID: 0}
+  _deathFlashDuration: 1.5
+  deathFlashHoldTime: 1.5
   _xpToNextLevel: 100
   _xpGrowthRate: 1.2
   Gun: {fileID: 0}

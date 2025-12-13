@@ -26,8 +26,12 @@ public class ShotgunShootStrategy : IShootStrategy
             if (bullet != null)
             {
                 PlayerBulletNormal bulletPlayer = bullet.GetComponent<PlayerBulletNormal>();
+
                 if (bulletPlayer != null)
+                {
+                    bulletPlayer.SetPoolKey(bulletKey);
                     bulletPlayer.SetDamage(gunData.Damage / quantityPerShoot);
+                }
             }
         }
     }

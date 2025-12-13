@@ -69,8 +69,6 @@ public class GunController : MonoBehaviour
 
     private void Update()
     {
-        AlignFirePointWithCamera();
-
         HandleShooting();
 
         if (_fireCooldown > 0)
@@ -83,10 +81,6 @@ public class GunController : MonoBehaviour
             {
                 NotifyAmmoChanged();
             }
-        }
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            AddReserveAmmo(10);
         }
     }
 
@@ -115,6 +109,8 @@ public class GunController : MonoBehaviour
 
     private void Shooting()
     {
+        PlayerController.Instance.RotateToCameraForwardSmooth();
+
         _fireCooldown = GunAttributes.FireSpeed;
         _currentAmmo--;
 
@@ -143,8 +139,6 @@ public class GunController : MonoBehaviour
 
         NotifyAmmoChanged();
         DisplayEffectMuzzleFlash();
-
-        Debug.DrawRay(_firePoint.position, shootDirection * 100f, Color.red, 1f);
     }
 
     private void AlignFirePointWithCamera()
@@ -165,36 +159,34 @@ public class GunController : MonoBehaviour
     }
     public bool NeedsReload()
     {
-        if (_isReloading) return false;
-
-        return _currentAmmo < GunAttributes.Ammo && _reserveAmmo > 0;
+        return !_isReloading && _currentAmmo < GunAttributes.MaxAmmo && _reserveAmmo > 0;
     }
-    public bool CanReload()//Check
+    public bool CanReload()
     {
         if (_isReloading) return false;
-        if (CurrentAmmo >= GunAttributes.MaxAmmo) return false;
-        if (ReserveAmmo <= 0) return false;
+        if (_currentAmmo >= GunAttributes.Ammo) return false;
+        if (_reserveAmmo <= 0) return false;
         return true;
     }
 
-    public void DoReload()//Action
+    public void DoReload()
     {
         int ammoNeeded = GunAttributes.Ammo - _currentAmmo;
+        if (ammoNeeded <= 0) return;
 
         int toReload = Mathf.Min(ammoNeeded, _reserveAmmo);
 
-        if (toReload > 0)
-        {
-            _currentAmmo += toReload;
-            _reserveAmmo -= toReload;
+        _currentAmmo += toReload;
+        _reserveAmmo -= toReload;
 
-            _soHolder.CurrentAmmo = _currentAmmo;
-            _soHolder.ReserveAmmo = _reserveAmmo;
+        _soHolder.CurrentAmmo = _currentAmmo;
+        _soHolder.ReserveAmmo = _reserveAmmo;
 
-            GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
-        }
+        GunDataManager.SaveAmmo(GunAttributes.Name, _currentAmmo, _reserveAmmo);
         NotifyAmmoChanged();
     }
+
+
     public void TryReload()
     {
         if (!CanReload()) return;

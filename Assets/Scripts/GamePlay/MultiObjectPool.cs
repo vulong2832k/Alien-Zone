@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class MultiObjectPool : MonoBehaviour
@@ -34,39 +34,63 @@ public class MultiObjectPool : MonoBehaviour
                 obj.transform.SetParent(transform);
                 objectPool.Enqueue(obj);
             }
+
             _poolDict.Add(pool.key, objectPool);
         }
     }
+
     public GameObject SpawnFromPool(string key, Vector3 position, Quaternion rotation)
     {
         if (!_poolDict.ContainsKey(key))
+        {
+            Debug.LogError($"POOL NOT FOUND: {key}");
             return null;
+        }
 
-        var obj = _poolDict[key].Dequeue();
+        // Nếu queue rỗng thì tạo thêm
+        if (_poolDict[key].Count == 0)
+        {
+            Debug.LogWarning($"Pool '{key}' hết object → Auto Expand");
+            var pool = _pools.Find(x => x.key == key);
+            if (pool != null)
+            {
+                GameObject newObj = Instantiate(pool.prefab);
+                newObj.SetActive(false);
+                newObj.transform.SetParent(transform);
+                _poolDict[key].Enqueue(newObj);
+            }
+        }
 
+        GameObject obj = _poolDict[key].Dequeue();
         obj.SetActive(false);
-
-        obj.transform.position = position;
-        obj.transform.rotation = rotation;
-
-        obj.SetActive(true);
 
         var agent = obj.GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agent != null)
-        {
             agent.enabled = false;
-            agent.enabled = true;
-        }
 
-        _poolDict[key].Enqueue(obj);
+        obj.transform.SetPositionAndRotation(position, rotation);
+
+        if (agent != null)
+            agent.Warp(position);
+
+        obj.SetActive(true);
+
+        if (agent != null)
+            agent.enabled = true;
+
         return obj;
     }
 
-
-
     public void ReturnToPool(string key, GameObject obj)
     {
+        if (!_poolDict.ContainsKey(key))
+        {
+            return;
+        }
+
         obj.SetActive(false);
         obj.transform.SetParent(transform);
+
+        _poolDict[key].Enqueue(obj);
     }
 }

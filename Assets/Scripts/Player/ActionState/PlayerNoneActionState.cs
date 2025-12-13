@@ -13,7 +13,11 @@ public class PlayerNoneActionState : PlayerActionState
         if (_player.ReloadPressed)
         {
             _player.ReloadPressed = false;
-            _actionState.ChangeState(_player.ReloadState);
+
+            if (_player.Gun.CanReload())
+            {
+                _actionState.ChangeState(_player.ReloadState);
+            }
             return;
         }
     }

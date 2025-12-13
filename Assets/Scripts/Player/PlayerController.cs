@@ -78,7 +78,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private float _xpGrowthRate = 1.2f;
 
     [Header("Gun: ")]
-    public GunController Gun;
+    public GunController Gun => _weaponSwitching.CurrentGun;
     [SerializeField] private WeaponSlots[] _weaponSlots;
 
     private GunStateType _currentGunStateType = GunStateType.Global;
@@ -166,13 +166,16 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void Update()
     {
         GetInputValue();
+        ActionStateMachine.CurrentState.Update();
 
-        StateMachine.CurrentState.HandleInput();
+        if (!IsActionLocked)
+        {
+            StateMachine.CurrentState.HandleInput();
+        }
         StateMachine.CurrentState.Update();
 
-        HandleKeyboardInput();
 
-        ActionStateMachine.CurrentState.Update();
+        HandleKeyboardInput();
 
         if (Input.GetKeyDown(KeyCode.K)) AddXP(25);
     }
@@ -262,11 +265,9 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     private void OnGunChanged(GunController newGun)
     {
-        Gun = newGun;
-
-        if (Gun != null && Gun.GunAttributes != null)
+        if (newGun != null && newGun.GunAttributes != null)
         {
-            _currentGunStateType = Gun.GunAttributes.StateType;
+            _currentGunStateType = newGun.GunAttributes.StateType;
         }
         else
         {
@@ -329,6 +330,12 @@ public class PlayerController : MonoBehaviour, IDamageable
         Vector3 targetVel = inputMove.normalized * MoveSpeed;
         Vector3 newVel = Vector3.Lerp(PlayerRb.linearVelocity, new Vector3(targetVel.x, PlayerRb.linearVelocity.y, targetVel.z), 0.2f);
         PlayerRb.linearVelocity = newVel;
+    }
+    public void RotateToCameraForwardSmooth()
+    {
+        Vector3 lookDir = CameraTransform.forward;
+        lookDir.y = 0;
+        transform.DORotateQuaternion(Quaternion.LookRotation(lookDir), 0.1f);
     }
     public void RotateToCameraDirection()
     {
@@ -485,6 +492,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         GunController currentGun = _weaponSwitching.CurrentGun;
         if (currentGun == null) return;
 
+        int maxReserve = currentGun.GunAttributes.MaxAmmo;
         float randomPercent = Random.Range(ammo.minPercentRecover, ammo.maxPercentRecover);
         int addAmount = Mathf.Max(1, Mathf.RoundToInt(currentGun.GunAttributes.MaxAmmo * randomPercent));
 
@@ -540,6 +548,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
         }
     }
+
     #endregion
     #region Interactable
     private void OnTriggerEnter(Collider other)

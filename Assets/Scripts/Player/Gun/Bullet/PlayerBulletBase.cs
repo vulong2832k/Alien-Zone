@@ -6,6 +6,7 @@ public abstract class PlayerBulletBase : MonoBehaviour
     [SerializeField] protected int _damage;
     [SerializeField] protected float _speed;
     [SerializeField] protected float lifeTimer = 3f;
+    [SerializeField] private string _poolKey;
 
     [Header("Effects: ")]
     [SerializeField] protected string _hitEffectKey = "HitEffect";
@@ -25,7 +26,10 @@ public abstract class PlayerBulletBase : MonoBehaviour
         HandleMovement();
         HandleLifeTime();
     }
-
+    public void SetPoolKey(string key)
+    {
+        _poolKey = key;
+    }
     protected abstract void HandleMovement();
 
     protected void HandleLifeTime()
@@ -47,7 +51,7 @@ public abstract class PlayerBulletBase : MonoBehaviour
 
     protected virtual void ReturnToPool()
     {
-        MultiObjectPool.Instance.ReturnToPool(this.gameObject.name, gameObject);
+        MultiObjectPool.Instance.ReturnToPool(_poolKey, gameObject);
     }
 
     public virtual void SetDamage(int damage) => this._damage = damage;

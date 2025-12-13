@@ -10,14 +10,14 @@ public class PlayerReloadState : PlayerActionState
     {
         base.Enter();
         _player.IsActionLocked = true;
+        _player.Gun.BlockFire = true;
 
-        if (_player.Gun == null)
+        if (_player.Gun == null || !_player.Gun.CanReload())
         {
             _actionState.ChangeState(_player.NoneActionState);
             return;
         }
-
-        _player.Gun.BlockFire = true;
+        
         string anim = GetReloadAnimation();
         _player.Animator.Play(anim);
 

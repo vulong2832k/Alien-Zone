@@ -11,6 +11,8 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
+        if (_player.Gun != null)
+            _player.Gun.BlockFire = true;
         _player.PlayerRb.AddForce(Vector3.up * _player.JumpForce, ForceMode.Impulse);
         _player.ConsumeJumpPressed();
 
@@ -46,5 +48,11 @@ public class PlayerJumpState : PlayerState
             else
                 _state.ChangeState(_player.IdleState);
         }
+    }
+    public override void Exit()
+    {
+        base.Exit();
+        if (_player.Gun != null)
+            _player.Gun.BlockFire = false;
     }
 }

@@ -87,11 +87,6 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             if (_weaponSwitching != null)
             {
                 GunController newGun = _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
-                if (PlayerController.Instance != null)
-                {
-                    PlayerController.Instance.Gun = newGun;
-                    WeaponEvents.OnWeaponChanged?.Invoke(newGun);
-                }
             }
         }
     }

@@ -230,7 +230,7 @@ public class EnemyController : MonoBehaviour, IDamageable
     {
         DOTween.Kill(transform);
         transform.localScale = Vector3.one;
-        MultiObjectPool.Instance.ReturnToPool(_enemyKey, gameObject);
+        Die();
     }
     //------------------------------------------Enemy Missiler-------------------------------------------------------------
     public void FireMissile(string bulletKey)
