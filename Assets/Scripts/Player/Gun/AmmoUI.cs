@@ -11,21 +11,21 @@ public class AmmoUI : MonoBehaviour
 
     private void OnEnable()
     {
-        WeaponEvents.OnWeaponChanged += HandleWeaponChanged;
+        WeaponSwitching.WeaponEvents.OnWeaponChanged += HandleWeaponChanged;
 
         var player = PlayerController.Instance;
         if (player != null && player.Gun != null)
         {
-
+            HandleWeaponChanged(player.Gun);
         }
-            //HandleWeaponChanged(player.Gun);
         else
             ClearUI();
     }
 
+
     private void OnDisable()
     {
-        WeaponEvents.OnWeaponChanged -= HandleWeaponChanged;
+        WeaponSwitching.WeaponEvents.OnWeaponChanged -= HandleWeaponChanged;
         UnsubscribeGun();
     }
 

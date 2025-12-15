@@ -69,6 +69,12 @@ public class ItemPickup : MonoBehaviour
         if (_isPlayerInRange && Input.GetKeyDown(pickupKey))
         {
             int remaining = _playerInventory.AddItem(itemData, amount);
+            int pickedAmount = amount - Mathf.Max(remaining, 0);
+
+            if (pickedAmount > 0 && LootChatUI.Instance != null)
+            {
+                LootChatUI.Instance.AddMessage($"+ {itemData.itemName} x{pickedAmount}");
+            }
 
             if (remaining <= 0)
             {

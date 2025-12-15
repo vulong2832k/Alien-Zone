@@ -131,7 +131,7 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             ItemType.Armor => 1,
             ItemType.Medicine => 10,
             ItemType.Grenade => 15,
-            _ => 99,
+            _ => 20,
         };
     }
 

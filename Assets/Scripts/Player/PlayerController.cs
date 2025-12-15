@@ -147,13 +147,13 @@ public class PlayerController : MonoBehaviour, IDamageable
         GetComponentWhenStart();
         InitActionState();
 
-        WeaponEvents.OnWeaponChanged += OnGunChanged;
+        WeaponSwitching.WeaponEvents.OnWeaponChanged += OnGunChanged;
     }
 
     void Start()
     {
         if (_hurtFlash == null)
-        {
+        {   
             var hs = FindAnyObjectByType<HurtScreen>();
             if (hs != null)
                 _hurtFlash = hs.HurtFlash;
@@ -261,7 +261,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     #region Event
     private void OnDestroy()
     {
-        WeaponEvents.OnWeaponChanged -= OnGunChanged;
+        WeaponSwitching.WeaponEvents.OnWeaponChanged -= OnGunChanged;
     }
     private void OnGunChanged(GunController newGun)
     {
@@ -497,7 +497,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         int addAmount = Mathf.Max(1, Mathf.RoundToInt(currentGun.GunAttributes.MaxAmmo * randomPercent));
 
         currentGun.AddReserveAmmo(addAmount);
-        WeaponEvents.OnWeaponChanged?.Invoke(currentGun);
+        WeaponSwitching.WeaponEvents.OnWeaponChanged?.Invoke(currentGun);
     }
 
     private void TryUseAmmo()

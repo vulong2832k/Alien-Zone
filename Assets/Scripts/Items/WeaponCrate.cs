@@ -47,7 +47,11 @@ public class WeaponCrate : MonoBehaviour, IInteractable
                 continue;
 
             SpawnPlayer.PlayerInventory.AddItem(entry.item, entry.amount);
-            Debug.Log($"Player nhận: {entry.item.name} x{entry.amount}");
+
+            if (LootChatUI.Instance != null)
+            {
+                LootChatUI.Instance.AddMessage($"+ {entry.item.itemName} x{entry.amount}");
+            }
         }
 
         // Mission
