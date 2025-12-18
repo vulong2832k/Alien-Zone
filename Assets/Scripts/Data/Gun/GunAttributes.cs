@@ -10,7 +10,8 @@ public enum GunType
     SMG,
     MG,
     Universal,
-    RPG
+    RPG,
+    MGGatling
 }
 
 public enum BulletType
@@ -91,6 +92,7 @@ public class GunAttributes : ScriptableObject
                 case GunType.MG:
                 case GunType.Sniper:
                 case GunType.RPG:
+                case GunType.MGGatling:
                     return GunStateType.Rifle;
                 default:
                     return GunStateType.Global;

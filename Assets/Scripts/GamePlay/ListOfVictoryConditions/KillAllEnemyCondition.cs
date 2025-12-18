@@ -22,13 +22,19 @@ public class KillAllEnemiesCondition : MonoBehaviour, IWinCondition
 
     public string GetDescription()
     {
-        int total = 0, killed = 0;
+        if (_zones == null || _zones.Length == 0)
+            return "Kill All Enemies";
+
+        int total = 0;
+        int killed = 0;
+
         foreach (var z in _zones)
         {
-            total += z.TotalEnemies;
+            total += z.CalculateTotalEnemies();
             killed += z.KilledEnemies;
         }
 
         return $"Kill All Enemies: {killed} / {total}";
     }
+
 }

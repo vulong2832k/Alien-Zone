@@ -44,7 +44,7 @@ public class ItemSO : ScriptableObject
                 break;
             case ItemType.Ammo:
                 isStackable = true;
-                maxStack = 999;
+                maxStack = 20;
                 break;
         }
     }

@@ -124,6 +124,20 @@ public class SpawnZone : MonoBehaviour
 
         return fallback;
     }
+    public int CalculateTotalEnemies()
+    {
+        int total = 0;
+
+        foreach (var info in spawnList)
+        {
+            foreach (var levelInfo in info.levelDistribution)
+            {
+                total += levelInfo.count;
+            }
+        }
+
+        return total;
+    }
 
 
 

@@ -20,6 +20,8 @@ public class SwitchImage : MonoBehaviour
     [SerializeField] private Sprite _sniperSprite;
     [SerializeField] private Sprite _smgSprite;
     [SerializeField] private Sprite _mgSprite;
+    [SerializeField] private Sprite _rpgSprite;
+    [SerializeField] private Sprite _mggatlingSprite;
 
     [Header("Animation: ")]
     [SerializeField] private RectTransform _uiPanel;
@@ -46,6 +48,8 @@ public class SwitchImage : MonoBehaviour
             {GunType.Rifle, _rifleSprite },
             {GunType.Sniper, _sniperSprite },
             {GunType.Shotgun, _shotgunSprite },
+            {GunType.RPG, _rpgSprite },
+            {GunType.MGGatling, _mggatlingSprite },
         };
 
         _uiPanel.anchoredPosition = _hiddenPos;

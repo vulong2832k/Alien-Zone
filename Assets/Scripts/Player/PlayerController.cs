@@ -4,12 +4,14 @@ using DG.Tweening;
 using System.Collections;
 using Random = UnityEngine.Random;
 
-
 public class PlayerController : MonoBehaviour, IDamageable
 {
     public static PlayerController Instance { get; private set; }
 
     public System.Action OnPlayerDead;
+
+    [SerializeField] private PlayerStats _stats;
+    [SerializeField] private PlayerLevelSystem _levelSystem;
 
     [SerializeField] private int _maxHP;
     [SerializeField] private int _currentHP;
@@ -26,7 +28,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     private float _defaultMoveSpeed;
     public Vector2 MoveInput { get; private set; }
     public float MoveSpeed {  get; set; }
-    
+    public bool IsMovingBackward => MoveInput.y < -0.1f;
     public float DefaultMoveSpeed => _defaultMoveSpeed;
     private float _currentYVelocity;
     public float smoothTime = 0.25f;
@@ -70,12 +72,6 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private CanvasGroup _deathFlash;
     [SerializeField] private float _deathFlashDuration = 1.5f;
     [SerializeField] private float deathFlashHoldTime = 3f;
-
-    [Header("Level System: ")]
-    private int _currentLevel = 1;
-    private int _currentXP = 0;
-    [SerializeField] private int _xpToNextLevel = 100;
-    [SerializeField] private float _xpGrowthRate = 1.2f;
 
     [Header("Gun: ")]
     public GunController Gun => _weaponSwitching.CurrentGun;
@@ -140,6 +136,18 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
         Instance = this;
 
+        if (_stats == null)
+            _stats = GetComponent<PlayerStats>();
+
+        if (_levelSystem == null)
+            _levelSystem = GetComponent<PlayerLevelSystem>();
+
+        if (_stats == null)
+            Debug.LogError("❌ PlayerStats is MISSING on Player!");
+
+        if (_levelSystem == null)
+            Debug.LogError("❌ PlayerLevelSystem is MISSING on Player!");
+
         if (_weaponSwitching == null)
             _weaponSwitching = FindAnyObjectByType<WeaponSwitching>();
 
@@ -149,20 +157,35 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         WeaponSwitching.WeaponEvents.OnWeaponChanged += OnGunChanged;
     }
-
     void Start()
     {
         if (_hurtFlash == null)
-        {   
+        {
             var hs = FindAnyObjectByType<HurtScreen>();
             if (hs != null)
                 _hurtFlash = hs.HurtFlash;
         }
-        _healRoutine = StartCoroutine(HealOverTime());
+
+        if (_deathFlash == null)
+        {
+            var ds = FindAnyObjectByType<DeathScreen>();
+            if (ds != null)
+                _deathFlash = ds.DeathFlash;
+        }
+
+        _maxHP = _stats.MaxHP;
+        _currentHP = _maxHP;
+
         InitStateMachine();
+
+        _stats.OnStatsChanged += ApplyStatsFromStatsSystem;
+        _levelSystem.OnXPChanged += HandleXPChanged;
+
+        _healRoutine = StartCoroutine(HealOverTime());
+
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
-        OnXPChanged?.Invoke(_currentXP, _xpToNextLevel, _currentLevel);
     }
+
     private void Update()
     {
         GetInputValue();
@@ -174,10 +197,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
         StateMachine.CurrentState.Update();
 
-
         HandleKeyboardInput();
-
-        if (Input.GetKeyDown(KeyCode.K)) AddXP(25);
     }
     void FixedUpdate()
     {
@@ -188,8 +208,6 @@ public class PlayerController : MonoBehaviour, IDamageable
         _defaultMoveSpeed = _moveSpeed;
         MoveSpeed = _moveSpeed;
         MoveWalking = _moveSpeed * 0.4f;
-
-        _currentHP = _maxHP;
 
         if (_cameraTransform == null)
             _cameraTransform = Camera.main.transform;
@@ -277,6 +295,27 @@ public class PlayerController : MonoBehaviour, IDamageable
         RefreshCurrentStateAnimation();
     }
     #endregion
+    #region LevelSystem
+    private void ApplyStatsFromStatsSystem()
+    {
+        if (_stats == null) return;
+
+        _maxHP = _stats.MaxHP;
+        _currentHP = Mathf.Clamp(_currentHP, 0, _maxHP);
+        MoveSpeed = _defaultMoveSpeed * _stats.MoveSpeedMultiplier;
+
+        OnHealthChanged?.Invoke(_currentHP, _maxHP);
+    }
+
+    private void HandleXPChanged(int currentXP, int xpToNext, int level)
+    {
+        OnXPChanged?.Invoke(currentXP, xpToNext, level);
+    }
+    public void GainXP(int amount)
+    {
+        _levelSystem.AddXP(amount, _stats.ExpMultiplier);
+    }
+    #endregion
     private void GetInputValue()
     {
         MoveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -339,25 +378,18 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     public void RotateToCameraDirection()
     {
-        Vector3 moveDir = new Vector3(PlayerRb.linearVelocity.x, 0f, PlayerRb.linearVelocity.z);
-        if (moveDir.sqrMagnitude > 0.1f)
-        {
-            float targetYaw = Mathf.Atan2(moveDir.x, moveDir.z) * Mathf.Rad2Deg;
-            float newYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref _currentYVelocity, smoothTime);
-            transform.rotation = Quaternion.Euler(0f, newYaw, 0f);
-            return;
-        }
+        if (MoveInput.y < 0f) return;
 
-        Vector3 forward = _cameraTransform.forward;
-        forward.y = 0;
-        forward.Normalize();
-        if (forward.sqrMagnitude > 0.01f)
-        {
-            float targetYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
-            float newYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref _currentYVelocity, smoothTime);
-            transform.rotation = Quaternion.Euler(0f, newYaw, 0f);
-        }
+        Vector3 camForward = _cameraTransform.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+
+        float targetYaw = Mathf.Atan2(camForward.x, camForward.z) * Mathf.Rad2Deg;
+        float newYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref _currentYVelocity,smoothTime);
+
+        transform.rotation = Quaternion.Euler(0f, newYaw, 0f);
     }
+
     public void TweenCrouch(bool isCrouching)
     {
         float targetY = isCrouching ? _crouchYScale : _startYScale;
@@ -384,6 +416,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     public bool IsGrounded()
     {
+        if (_groundCheck == null) return false;
         return Physics.CheckSphere(_groundCheck.position, _groundCheckRadius, _groundLayer);
     }
     public void SetJumpPressed()
@@ -453,7 +486,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         {
             yield return new WaitForSeconds(5f);
 
-            _healRecoveryTotal = _healRecoveryBasic + _healRecoveryBonus;
+            _healRecoveryTotal = _healRecoveryBasic * (1f + _stats.hpPoint * 0.05f);
             if (_currentHP < _maxHP && _healRecoveryTotal > 0)
             {
                 _currentHP += Mathf.RoundToInt(_healRecoveryTotal);
@@ -462,28 +495,6 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
         }
     }
-    #region LevelSystem
-    public void AddXP(int amount)
-    {
-        _currentXP += amount;
-
-        OnXPChanged?.Invoke(_currentXP, _xpToNextLevel, _currentLevel);
-        if (_currentXP >= _xpToNextLevel) LevelUp();
-    }
-    private void LevelUp()
-    {
-        _currentXP -= _xpToNextLevel;
-        _currentLevel++;
-
-        _xpToNextLevel = Mathf.RoundToInt(_xpToNextLevel * _xpGrowthRate);
-
-        _maxHP += 10;
-        _currentHP = _maxHP;
-
-        OnXPChanged?.Invoke(_currentXP, _xpToNextLevel, _currentLevel);
-        OnHealthChanged?.Invoke(_currentHP, _maxHP);
-    }
-    #endregion
     #region Gun
     public void AddAmmo(AmmoSO ammo)
     {

@@ -23,7 +23,7 @@ MonoBehaviour:
   _requiredAmmo: {fileID: 11400000, guid: e100b4a7c8831d849982c1e90b8e4405, type: 2}
   _quantityPerShoot: 0
   _speardAngle: 0
-  _gunType: 6
+  _gunType: 9
   _bulletType: 0
   _positionOffset: {x: 0, y: -0.064, z: -0.269}
   _rotationOffset: {x: 0, y: 0, z: 0}

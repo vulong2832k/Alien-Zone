@@ -8,8 +8,11 @@ public class EnemyController : MonoBehaviour, IDamageable
     [Header("Attributes: ")]
     [SerializeField] private int _currentHP;
     private float _cooldown;
+    public int CurrentHP => _currentHP;
+    public int MaxHP => stats.HP;
 
     [Header("References: ")]
+    private PlayerController _player;
     public EnemySO dataEnemy;
     [SerializeField] private Transform _targetPlayer;
     public Transform Target => _targetPlayer;
@@ -43,6 +46,7 @@ public class EnemyController : MonoBehaviour, IDamageable
 
     private void Awake()
     {
+        _player = FindAnyObjectByType<PlayerController>();
         _agent = GetComponent<NavMeshAgent>();
         _stats = GetComponent<EnemyStats>();
 
@@ -58,6 +62,9 @@ public class EnemyController : MonoBehaviour, IDamageable
         _cooldown = 0f;
         _isAttacking = false;
         _playerInRange = false;
+
+        ApplyStats();
+
         StartCoroutine(InitAfterSpawn());
 
         if (dataEnemy != null && dataEnemy.AttackStrategy != null)
@@ -71,8 +78,6 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         if (dataEnemy != null && _agent != null)
             _agent.speed = dataEnemy.MoveSpeed;
-
-        ApplyStats();
     }
 
     private void Update()
@@ -297,9 +302,8 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         OnEnemyDie?.Invoke(this);
 
-        PlayerController player = FindAnyObjectByType<PlayerController>();
-        if (player != null && _stats != null)
-            player.AddXP(_stats.ExpReward);
+        if (_player != null && _stats != null)
+            _player.GainXP(_stats.ExpReward);
 
         EnemyLoot loot = GetComponent<EnemyLoot>();
         loot?.DropLoot();

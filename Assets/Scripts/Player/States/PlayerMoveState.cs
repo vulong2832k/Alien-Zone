@@ -8,21 +8,31 @@ public class PlayerMoveState : PlayerState
     {
         _player.MoveSpeed = _player.DefaultMoveSpeed;
 
-        _player.PlayGunBasedAnimation(
-            "P_Global_Run",
-            "P_Pistol_Run",
-            "P_Rifle_Run"
-        );
+        PlayMoveAnimation();
     }
     public override void OnGunChanged()
     {
-        _player.PlayGunBasedAnimation(
-            "P_Global_Run",
-            "P_Pistol_Run",
-            "P_Rifle_Run"
-        );
+        PlayMoveAnimation();
     }
-
+    private void PlayMoveAnimation()
+    {
+        if (_player.IsMovingBackward)
+        {
+            _player.PlayGunBasedAnimation(
+                "P_Global_RunBack",
+                "P_Pistol_RunBack",
+                "P_Rifle_RunBack"
+            );
+        }
+        else
+        {
+            _player.PlayGunBasedAnimation(
+                "P_Global_Run",
+                "P_Pistol_Run",
+                "P_Rifle_Run"
+            );
+        }
+    }
     public override void HandleInput()
     {
         if (_player.IsActionLocked) return;
@@ -58,6 +68,11 @@ public class PlayerMoveState : PlayerState
     public override void Update()
     {
         _player.PlayerMovement();
-        _player.RotateToCameraDirection();
+
+        if (!_player.IsMovingBackward)
+            _player.RotateToCameraDirection();
+
+        PlayMoveAnimation();
     }
+    
 }
