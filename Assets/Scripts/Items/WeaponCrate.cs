@@ -37,6 +37,9 @@ public class WeaponCrate : MonoBehaviour, IInteractable
         if (_opened) return;
 
         _opened = true;
+
+        GameManager.Instance.AddChestLoot();
+
         _animator.SetBool("Open", true);
         StartCoroutine(AutoClose());
 

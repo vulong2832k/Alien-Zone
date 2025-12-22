@@ -64,15 +64,6 @@ public class PlayerController : MonoBehaviour, IDamageable
     private CapsuleCollider _collider;
     public bool IsCrouching { get; set; }
 
-    [Header("Effect Flash: ")]
-    [SerializeField] private CanvasGroup _hurtFlash;
-    [SerializeField] private float _flashDuration = 0.15f;
-    [SerializeField] private float _flashAlpha = 0.6f;
-
-    [SerializeField] private CanvasGroup _deathFlash;
-    [SerializeField] private float _deathFlashDuration = 1.5f;
-    [SerializeField] private float deathFlashHoldTime = 3f;
-
     [Header("Gun: ")]
     public GunController Gun => _weaponSwitching.CurrentGun;
     [SerializeField] private WeaponSlots[] _weaponSlots;
@@ -159,20 +150,6 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     void Start()
     {
-        if (_hurtFlash == null)
-        {
-            var hs = FindAnyObjectByType<HurtScreen>();
-            if (hs != null)
-                _hurtFlash = hs.HurtFlash;
-        }
-
-        if (_deathFlash == null)
-        {
-            var ds = FindAnyObjectByType<DeathScreen>();
-            if (ds != null)
-                _deathFlash = ds.DeathFlash;
-        }
-
         _maxHP = _stats.MaxHP;
         _currentHP = _maxHP;
 
@@ -211,8 +188,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         if (_cameraTransform == null)
             _cameraTransform = Camera.main.transform;
-
-        Cursor.lockState = CursorLockMode.Locked;
 
         _startYScale = transform.localScale.y;
     }
@@ -440,46 +415,29 @@ public class PlayerController : MonoBehaviour, IDamageable
         _currentHP -= damage;
         _currentHP = Mathf.Clamp(_currentHP, 0, _maxHP);
 
+        GameManager.Instance.AddDamageTaken(damage);
         OnHealthChanged?.Invoke(_currentHP, _maxHP);
 
-        HurtFlash();
+        ScreenEffectManager.Instance.Play(ScreenEffectType.Hurt, 0.15f);
 
         if (_currentHP <= 0)
         {
             IsDead = true;
             IsActionLocked = true;
+
             OnPlayerDead?.Invoke();
+
             Time.timeScale = 0.3f;
-            DeathFlash();
-            if (_healRoutine != null) StopCoroutine(_healRoutine);
+
+            ScreenEffectManager.Instance.Play(ScreenEffectType.Death);
+
+            if (_healRoutine != null)
+                StopCoroutine(_healRoutine);
+
             StateMachine.ChangeState(DeadState);
         }
     }
-    private void HurtFlash()
-    {
-        if (_hurtFlash == null) return;
 
-        _hurtFlash.DOKill();
-        _hurtFlash.alpha = _flashAlpha;
-
-        _hurtFlash.DOFade(0f, _flashDuration);
-    }
-    public void DeathFlash()
-    {
-        if (_deathFlash == null) return;
-
-        _deathFlash.DOKill();
-        _deathFlash.alpha = 0;
-
-        _deathFlash.DOFade(1f, 0.1f)
-            .OnComplete(() =>
-            {
-                DOVirtual.DelayedCall(deathFlashHoldTime, () =>
-                {
-                    _deathFlash.DOFade(0f, _deathFlashDuration);
-                });
-            });
-    }
     private IEnumerator HealOverTime()
     {
         while (true)

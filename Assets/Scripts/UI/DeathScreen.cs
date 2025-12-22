@@ -1,12 +1,22 @@
+using DG.Tweening;
 using UnityEngine;
 
-public class DeathScreen : MonoBehaviour
+public class DeathScreen : ScreenEffectBase
 {
-    public static DeathScreen Instance { get; private set; }
-    public CanvasGroup DeathFlash;
+    [SerializeField] private float _holdTime = 3f;
 
-    private void Awake()
+    public override void Play(float duration = 1.5f)
     {
-        Instance = this;
+        _canvasGroup.DOKill();
+        _canvasGroup.alpha = 0f;
+
+        _canvasGroup.DOFade(1f, 0.1f)
+            .OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(this._holdTime, () =>
+                {
+                    _canvasGroup.DOFade(0f, duration);
+                });
+            });
     }
 }

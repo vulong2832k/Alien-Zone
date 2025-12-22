@@ -73,6 +73,7 @@ public class ItemPickup : MonoBehaviour
 
             if (pickedAmount > 0 && LootChatUI.Instance != null)
             {
+                GameManager.Instance?.AddItemLoot(pickedAmount);
                 LootChatUI.Instance.AddMessage($"+ {itemData.itemName} x{pickedAmount}");
             }
 

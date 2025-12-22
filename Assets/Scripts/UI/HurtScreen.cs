@@ -1,12 +1,14 @@
+using DG.Tweening;
 using UnityEngine;
 
-public class HurtScreen : MonoBehaviour
+public class HurtScreen : ScreenEffectBase
 {
-    public static HurtScreen Instance { get; private set; }
-    public CanvasGroup HurtFlash;
+    [SerializeField] private float _maxAlpha = 0.6f;
 
-    private void Awake()
+    public override void Play(float duration = 0.15f)
     {
-        Instance = this;
+        _canvasGroup.DOKill();
+        _canvasGroup.alpha = this._maxAlpha;
+        _canvasGroup.DOFade(0f, duration).SetEase(Ease.OutQuad);
     }
 }

@@ -283,7 +283,10 @@ public class EnemyController : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         if (!IsAlive) return;
+
         _currentHP -= damage;
+        GameManager.Instance?.AddDamage(damage);
+
         if (_currentHP <= 0)
         {
             Die();
@@ -307,6 +310,8 @@ public class EnemyController : MonoBehaviour, IDamageable
 
         EnemyLoot loot = GetComponent<EnemyLoot>();
         loot?.DropLoot();
+
+        GameManager.Instance.AddKill();
 
         stateMachine.ChangeState(DeathState);
     }
@@ -352,5 +357,4 @@ public class EnemyController : MonoBehaviour, IDamageable
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, dataEnemy?.FollowRange ?? 0f);
     }
-    
 }
