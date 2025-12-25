@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         GetComponentWhenStart();
         InitActionState();
 
-        WeaponSwitching.WeaponEvents.OnWeaponChanged += OnGunChanged;
+        WeaponEvents.OnWeaponChanged += OnGunChanged;
     }
     void Start()
     {
@@ -254,7 +254,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     #region Event
     private void OnDestroy()
     {
-        WeaponSwitching.WeaponEvents.OnWeaponChanged -= OnGunChanged;
+        WeaponEvents.OnWeaponChanged -= OnGunChanged;
     }
     private void OnGunChanged(GunController newGun)
     {
@@ -466,7 +466,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         int addAmount = Mathf.Max(1, Mathf.RoundToInt(currentGun.GunAttributes.MaxAmmo * randomPercent));
 
         currentGun.AddReserveAmmo(addAmount);
-        WeaponSwitching.WeaponEvents.OnWeaponChanged?.Invoke(currentGun);
+        WeaponEvents.OnWeaponChanged?.Invoke(currentGun);
     }
 
     private void TryUseAmmo()

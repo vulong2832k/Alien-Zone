@@ -15,5 +15,4 @@ public class RangerAttackSO : EnemyAttackSO
             extraString = BulletKey,
         };
     }
-
 }

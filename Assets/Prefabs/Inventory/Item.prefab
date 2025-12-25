@@ -198,15 +198,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 125967835a361b7498d2a54141cf82ec, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -273,7 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _slotImage: {fileID: 2744099122395206768}
   _amountText: {fileID: 4937119030260567614}
-  _emptySlotSprite: {fileID: 21300008, guid: 7188e9d0ec465034995ea794e337b4bd, type: 3}
+  _emptySlotSprite: {fileID: 21300000, guid: ce9f4a5423ac1f848a73d5a7e7b9fcc0, type: 3}
   _dragItemPrefab: {fileID: 38037642969983068, guid: 89454f57f39e3194c98792a4c2f756ad, type: 3}
   _splitPanel: {fileID: 0}
 --- !u!1 &9063466872491163884

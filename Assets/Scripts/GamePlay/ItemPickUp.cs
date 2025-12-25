@@ -68,6 +68,20 @@ public class ItemPickup : MonoBehaviour
 
         if (_isPlayerInRange && Input.GetKeyDown(pickupKey))
         {
+            if (itemData is ArmorSO armorSO)
+            {
+                ArmorInstance armorInstance = new ArmorInstance(armorSO);
+
+                EquipmentSystem.Instance.AddArmor(armorInstance);
+
+                LootChatUI.Instance?.AddMessage(
+                    $"+ {armorSO.itemName} (HP +{armorInstance.bonusMaxHP})"
+                );
+
+                Destroy(gameObject);
+                return;
+            }
+
             int remaining = _playerInventory.AddItem(itemData, amount);
             int pickedAmount = amount - Mathf.Max(remaining, 0);
 

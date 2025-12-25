@@ -4,8 +4,13 @@ using UnityEngine;
 public class ArmorSO : ItemSO
 {
     [Header("Stats: ")]
-    public int bonusMaxHP;
-    public int bonusCurrentAmmo;
-    public float bonusMoveSpeed;
-    public int bonusSlotItem;
+    public int baseMaxHP;
+    public int baseCurrentAmmo;
+    public float baseMoveSpeed;
+    public int baseSlotItem;
+
+    [Header("Random Range")]
+    public Vector2Int bonusMaxHPRange;
+    public Vector2Int bonusCurrentAmmoRange;
+    public Vector2 bonusMoveSpeedRange;
 }

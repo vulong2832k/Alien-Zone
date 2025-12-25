@@ -7,6 +7,8 @@ public class EquipmentSystem : MonoBehaviour
 
     [SerializeField] private List<EquipmentSlotUI> _slots = new List<EquipmentSlotUI>();
 
+    public List<ArmorInstance> Armors = new();
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -26,5 +28,9 @@ public class EquipmentSystem : MonoBehaviour
     public List<EquipmentSlotUI> GetAllSlots()
     {
         return _slots;
+    }
+    public void AddArmor(ArmorInstance armor)
+    {
+        Armors.Add(armor);
     }
 }

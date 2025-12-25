@@ -22,7 +22,7 @@ public class PlayerReloadState : PlayerActionState
         _reloadGun = _player.Gun;
         _player.Gun.BlockFire = true;
 
-        WeaponSwitching.WeaponEvents.OnWeaponChanged += OnWeaponChanged;
+        WeaponEvents.OnWeaponChanged += OnWeaponChanged;
 
         string anim = GetReloadAnimation();
         _player.Animator.Play(anim);
@@ -33,7 +33,7 @@ public class PlayerReloadState : PlayerActionState
 
     public override void Exit()
     {
-        WeaponSwitching.WeaponEvents.OnWeaponChanged -= OnWeaponChanged;
+        WeaponEvents.OnWeaponChanged -= OnWeaponChanged;
 
         if (_reloadGun != null)
             _reloadGun.BlockFire = false;

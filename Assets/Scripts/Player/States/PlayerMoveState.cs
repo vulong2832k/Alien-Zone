@@ -7,7 +7,6 @@ public class PlayerMoveState : PlayerState
     public override void Enter()
     {
         _player.MoveSpeed = _player.DefaultMoveSpeed;
-
         PlayMoveAnimation();
     }
     public override void OnGunChanged()
@@ -71,8 +70,6 @@ public class PlayerMoveState : PlayerState
 
         if (!_player.IsMovingBackward)
             _player.RotateToCameraDirection();
-
-        PlayMoveAnimation();
     }
     
 }

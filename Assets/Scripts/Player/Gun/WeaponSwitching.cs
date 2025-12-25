@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 public class WeaponSwitching : MonoBehaviour
 {
-    public static class WeaponEvents
-    {
-        public static Action<GunController> OnWeaponChanged;
-    }
-
     [Header("Gun Setup")]
     [SerializeField] private Transform _gunParent;
     [SerializeField] private SwitchImage _switchImage;
@@ -102,7 +97,7 @@ public class WeaponSwitching : MonoBehaviour
 
         _currentIndex = index;
 
-        WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
+        WeaponEvents.RaiseWeaponChanged(CurrentGun);
         UpdateUI();
     }
 
@@ -141,7 +136,7 @@ public class WeaponSwitching : MonoBehaviour
         else
         {
             CurrentGun = _equippedGuns[slotIndex];
-            WeaponEvents.OnWeaponChanged?.Invoke(CurrentGun);
+            WeaponEvents.RaiseWeaponChanged(CurrentGun);
             UpdateUI();
         }
 
