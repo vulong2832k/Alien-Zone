@@ -35,6 +35,6 @@ public class LosePanelUI : MonoBehaviour
     private void OnExitClicked()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        LoadingManager.Instance.LoadScene("MainMenu");
     }
 }

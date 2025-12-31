@@ -95,4 +95,11 @@ public class SettingPanel : MonoBehaviour
         _sfxOnImg.gameObject.SetActive(_sfxOn);
         _sfxOffImg.gameObject.SetActive(!_sfxOn);
     }
+    public void ExitPanel()
+    {
+        if (MainMenuController.Instance != null)
+        {
+            MainMenuController.Instance.ExitCurrentPanel();
+        }
+    }
 }

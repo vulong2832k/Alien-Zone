@@ -6,21 +6,32 @@ public class NewGamePanel : MonoBehaviour
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private MainMenuController _mainMenuController;
 
+    private string _slotId;
+
+    public void SetSlot(string slotId)
+    {
+        _slotId = slotId;
+    }
+
     public void OnEnterButton()
     {
-        string playerName = this.nameInput.text.Trim();
+        string playerName = nameInput.text.Trim();
 
         if (string.IsNullOrEmpty(playerName))
         {
-            Debug.Log("Player name empty!");
             return;
         }
-        PlayerDataManager.Instance.CreateNewPlayer(playerName);
+
+        PlayerDataManager.Instance.CreateNewPlayer(_slotId, playerName);
 
         _mainMenuController.ShowPanel("SelectLevelPanel");
     }
-    public void OnBackButton()
+
+    public void ExitPanel()
     {
-        _mainMenuController.ShowPanel("MainMenu");
+        if (MainMenuController.Instance != null)
+        {
+            MainMenuController.Instance.ExitCurrentPanel();
+        }
     }
 }

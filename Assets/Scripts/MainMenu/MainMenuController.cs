@@ -11,17 +11,28 @@ public class MainMenuController : MonoBehaviour
         public CanvasGroup canvasGroup;
     }
 
+    public static MainMenuController Instance { get; private set; }
     [Header("Default Panel")]
     [SerializeField] private string _defaultPanelName = "MainMenuPanel";
 
     [Header("Panel:")]
     [SerializeField] private List<MenuPanel> _panelList;
 
+    [SerializeField] private NewGamePanel _newGamePanel;
+
     [Header("Config:")]
     [SerializeField] private float _fadeDuration = 0.3f;
 
     private CanvasGroup _currentPanel;
+    private Coroutine _fadeCoroutine;
 
+    private void Awake()
+    {
+        if(Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+    }
     private void Start()
     {
         foreach (var panel in _panelList)
@@ -36,17 +47,22 @@ public class MainMenuController : MonoBehaviour
 
     public void ShowPanel(string panelName)
     {
-        StopAllCoroutines();
-
         CanvasGroup target = GetPanel(panelName);
         if (target == null || target == _currentPanel) return;
 
+        StartCoroutine(SwitchPanelRoutine(target));
+    }
+    public void ShowNewGamePanel(string slotId)
+    {
+        _newGamePanel.SetSlot(slotId);
+        ShowPanel("NamePlayerPanel");
+    }
+    private IEnumerator SwitchPanelRoutine(CanvasGroup target)
+    {
         if (_currentPanel != null)
-        {
-            StartCoroutine(FadePanel(_currentPanel, false));
-        }
+            yield return StartCoroutine(FadePanel(_currentPanel, false));
 
-        StartCoroutine(FadePanel(target, true));
+        yield return StartCoroutine(FadePanel(target, true));
         _currentPanel = target;
     }
     private CanvasGroup GetPanel(string panelName)
@@ -61,15 +77,20 @@ public class MainMenuController : MonoBehaviour
     }
     private IEnumerator FadePanel(CanvasGroup panel, bool show)
     {
-        float start = panel.alpha;
-        float end = show ? 1f : 0f;
-
         if (show)
         {
             panel.gameObject.SetActive(true);
             panel.interactable = true;
             panel.blocksRaycasts = true;
         }
+        else
+        {
+            panel.interactable = false;
+            panel.blocksRaycasts = false;
+        }
+
+        float start = panel.alpha;
+        float end = show ? 1f : 0f;
 
         float time = 0f;
         while (time < _fadeDuration)
@@ -83,11 +104,10 @@ public class MainMenuController : MonoBehaviour
 
         if (!show)
         {
-            panel.interactable = false;
-            panel.blocksRaycasts = false;
-            panel.gameObject.SetActive(false);  
+            panel.gameObject.SetActive(false);
         }
     }
+
     private void SetPanel(CanvasGroup panel, bool show, bool instant)
     {
         if (panel == null) return;
@@ -96,6 +116,21 @@ public class MainMenuController : MonoBehaviour
         panel.interactable = show;
         panel.blocksRaycasts = show;
         panel.gameObject.SetActive(show);
+    }
+    public void ExitCurrentPanel()
+    {
+        if (_fadeCoroutine != null)
+            StopCoroutine(_fadeCoroutine);
+
+        if (_currentPanel != null)
+            _fadeCoroutine = StartCoroutine(FadePanel(_currentPanel, false));
+
+        CanvasGroup defaultPanel = GetPanel(_defaultPanelName);
+        if (defaultPanel != null)
+        {
+            _fadeCoroutine = StartCoroutine(FadePanel(defaultPanel, true));
+            _currentPanel = defaultPanel;
+        }
     }
     public void ExitGameButton()
     {

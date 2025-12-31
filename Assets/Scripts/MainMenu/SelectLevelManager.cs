@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LevelSelectManager : MonoBehaviour
 {
@@ -17,8 +17,16 @@ public class LevelSelectManager : MonoBehaviour
 
     public void SelectLevel(int levelIndex)
     {
-        //PlayerDataManager.Instance.SetCurrentLevel(levelIndex);
+        Debug.Log("SelectLevel called");
 
-        //LoadingManager.Instance.LoadScene($"Map{levelIndex + 1}");
+        if (PlayerDataManager.Instance == null)
+            Debug.LogError("PlayerDataManager.Instance = NULL");
+
+        if (LoadingManager.Instance == null)
+            Debug.LogError("LoadingManager.Instance = NULL");
+
+        PlayerDataManager.Instance.SetCurrentLevel(levelIndex);
+        LoadingManager.Instance.LoadScene($"Level_{levelIndex + 1}");
     }
+
 }

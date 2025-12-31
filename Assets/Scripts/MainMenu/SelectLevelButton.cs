@@ -4,9 +4,13 @@ using UnityEngine.UI;
 
 public class SelectLevelButton : MonoBehaviour
 {
+    [Header("Config")]
     [SerializeField] private int _levelIndex;
+
+    [Header("UI")]
     [SerializeField] private Button _selectBtn;
-    [SerializeField] private GameObject _lockIcon;
+    [SerializeField] private GameObject _unlockImage;
+    [SerializeField] private GameObject _lockImage;
     [SerializeField] private TextMeshProUGUI _levelText;
 
     public void Setup(int unlockLevel)
@@ -16,10 +20,16 @@ public class SelectLevelButton : MonoBehaviour
         bool unlocked = _levelIndex <= unlockLevel;
 
         _selectBtn.interactable = unlocked;
-        _lockIcon.SetActive(!unlocked);
+
+        _unlockImage.SetActive(unlocked);
+        _lockImage.SetActive(!unlocked);
     }
+
     public void OnClick()
     {
+        if (!_selectBtn.interactable)
+            return;
+
         LevelSelectManager.Instance.SelectLevel(_levelIndex);
     }
 }

@@ -30,7 +30,7 @@ public class PausePanel : MonoBehaviour
     private void OnExitClicked()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        LoadingManager.Instance.LoadScene("MainMenu");
     }
 
     private void OnSettingClicked()

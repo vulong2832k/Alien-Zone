@@ -45,7 +45,7 @@ public class VictoryPanel : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("MainMenu");
+            LoadingManager.Instance.LoadScene("MainMenu");
         }
     }
 
@@ -56,17 +56,17 @@ public class VictoryPanel : MonoBehaviour
     private void OnExitClicked()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        LoadingManager.Instance.LoadScene("MainMenu");
     }
 
     public void SetData(GameResultData data)
     {
-        _totalTimeText.text = $"Tổng thời gian chơi: {FormatTime(data.totalTime)}";
-        _totalKillText.text = $"Số lượng quái bị giết: {data.totalKill.ToString()}";
-        _totalItemLootText.text = $"Số vật phẩm nhặt được {data.totalItemLoot.ToString()}";
-        _totalDamage.text = $"Tổng sát thương gây ra: {data.totalDamage.ToString()}";
-        _totalDamageTaken.text = $"Tổng sát thương phải chịu: {data.totalDamageTaken.ToString()}";
-        _totalChestLoot.text = $"Nhặt được rương vật phẩm: {data.totalChestLoot.ToString()}";
+        _totalTimeText.text = $"Total Time: {FormatTime(data.totalTime)}";
+        _totalKillText.text = $"Kill Enemy: {data.totalKill.ToString()}";
+        _totalItemLootText.text = $"Total Items Picked:  {data.totalItemLoot.ToString()}";
+        _totalDamage.text = $"Total Damage: {data.totalDamage.ToString()}";
+        _totalDamageTaken.text = $"Total Damage Taken: {data.totalDamageTaken.ToString()}";
+        _totalChestLoot.text = $"Total Chest Picked: {data.totalChestLoot.ToString()}";
     }
 
     private string FormatTime(float time)
