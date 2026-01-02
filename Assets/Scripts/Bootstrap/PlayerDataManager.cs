@@ -60,6 +60,13 @@ public class PlayerDataManager : MonoBehaviour
     }
     public void CreateNewPlayer(string slotId, string playerName)
     {
+        string key = SLOT_PREFIX + slotId;
+
+        if (PlayerPrefs.HasKey(key))
+        {
+            return;
+        }
+
         CurrentSlotId = slotId;
         CurrentData = new PlayerData
         {
@@ -67,8 +74,10 @@ public class PlayerDataManager : MonoBehaviour
             highestUnlockedMap = 0,
             currentLevelIndex = 0
         };
+
         Save();
     }
+
 
     public void SetCurrentLevel(int levelIndex)
     {
@@ -87,6 +96,18 @@ public class PlayerDataManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    public string GetFirstEmptySlot()
+    {
+        for (int i = 0; i < MAX_SLOT; i++)
+        {
+            string slotId = GetSlotId(i);
+            if (!PlayerPrefs.HasKey(SLOT_PREFIX + slotId))
+            {
+                return slotId;
+            }
+        }
+        return null;
+    }
 
     private bool LoadCurrent()
     {
@@ -97,4 +118,20 @@ public class PlayerDataManager : MonoBehaviour
         CurrentData = JsonUtility.FromJson<PlayerData>(json);
         return true;
     }
+    public void ClearAllData()
+    {
+        for (int i = 0; i < MAX_SLOT; i++)
+        {
+            string slotID = GetSlotId(i);
+            string key = SLOT_PREFIX + slotID;
+
+            if(PlayerPrefs.HasKey(key))
+                PlayerPrefs.DeleteKey(key);
+        }
+
+        PlayerPrefs.Save();
+
+        CurrentSlotId = null;
+        CurrentData = null;
+        }
 }

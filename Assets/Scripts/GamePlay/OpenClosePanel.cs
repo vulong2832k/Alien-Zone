@@ -1,69 +1,57 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class OpenClosePanel : MonoBehaviour
 {
-    [SerializeField] private GameObject _playerSystem;
+    [SerializeField] private CanvasGroup _playerSystemCanvas;
     private bool _isOpen = false;
 
     private void Start()
     {
-        _playerSystem.SetActive(false);
+        ClosePanel();
     }
 
-    void Update()
+    private void Update()
     {
-        PanelControlWithKeyBoard();
-    }
-
-    private void PanelControlWithKeyBoard()
-    {
-        if (Input.anyKeyDown)
+        if (Input.GetKeyDown(KeyCode.B))
         {
-            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
-            {
-                if (Input.GetKeyDown(key))
-                {
-                    switch (key)
-                    {
-                        case KeyCode.B:
-                            OpenClosePlayerSystem();
-                            break;
-
-
-                        default:
-                            break;
-                    }
-                }
-            }
+            TogglePanel();
         }
     }
 
-    private void OpenClosePlayerSystem()
+    private void TogglePanel()
     {
-        if (_playerSystem == null)
-        {
-            return;
-        }
-
-        _isOpen = !_isOpen;
-        _playerSystem.SetActive(_isOpen);
-
         if (_isOpen)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            Time.timeScale = 0f;
-
-            var inventoryUI = _playerSystem.GetComponentInChildren<InventoryUI>();
-            inventoryUI?.Setup(FindAnyObjectByType<InventorySystem>());
-        }
+            ClosePanel();
         else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            Time.timeScale = 1f;
-        }
+            OpenPanel();
     }
 
+    private void OpenPanel()
+    {
+        _isOpen = true;
+
+        _playerSystemCanvas.alpha = 1f;
+        _playerSystemCanvas.interactable = true;
+        _playerSystemCanvas.blocksRaycasts = true;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        Time.timeScale = 0f;
+
+        var inventoryUI = _playerSystemCanvas.GetComponentInChildren<InventoryUI>();
+        inventoryUI?.Setup(FindAnyObjectByType<InventorySystem>());
+    }
+
+    private void ClosePanel()
+    {
+        _isOpen = false;
+
+        _playerSystemCanvas.alpha = 0f;
+        _playerSystemCanvas.interactable = false;
+        _playerSystemCanvas.blocksRaycasts = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        Time.timeScale = 1f;
+    }
 }

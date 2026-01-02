@@ -18,30 +18,40 @@ public class SettingPanel : MonoBehaviour
 
     [Header("Button")]
     [SerializeField] private Button _exitBtn;
-
-    private bool _musicOn = true;
-    private bool _sfxOn = true;
-
+    private void OnEnable()
+    {
+        SyncUI();
+    }
     private void Awake()
     {
         _exitBtn.onClick.AddListener(Hide);
 
-        _musicSlider.onValueChanged.AddListener(SetMusicVolume);
-        _sfxSlider.onValueChanged.AddListener(SetSFXVolume);
+        _musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
+        _sfxSlider.onValueChanged.AddListener(OnSFXSliderChanged);
 
-        _musicOnImg.GetComponent<Button>().onClick.AddListener(ToggleMusic);
-        _musicOffImg.GetComponent<Button>().onClick.AddListener(ToggleMusic);
+        _musicOnImg.GetComponent<Button>().onClick.AddListener(OnToggleMusic);
+        _musicOffImg.GetComponent<Button>().onClick.AddListener(OnToggleMusic);
 
-        _sfxOnImg.GetComponent<Button>().onClick.AddListener(ToggleSFX);
-        _sfxOffImg.GetComponent<Button>().onClick.AddListener(ToggleSFX);
-
-        UpdateMusicUI();
-        UpdateSFXUI();
+        _sfxOnImg.GetComponent<Button>().onClick.AddListener(OnToggleSFX);
+        _sfxOffImg.GetComponent<Button>().onClick.AddListener(OnToggleSFX);
     }
+    private void SyncUI()
+    {
+        if (AudioManager.Instance == null)
+            return;
 
+        var audio = AudioManager.Instance;
+
+        _musicSlider.SetValueWithoutNotify(audio.MusicVolume);
+        _sfxSlider.SetValueWithoutNotify(audio.SFXVolume);
+
+        UpdateMusicUI(audio.MusicMuted);
+        UpdateSFXUI(audio.SFXMuted);
+    }
     public void Show()
     {
-        _settingPanel.gameObject.SetActive(true);
+        SyncUI();
+
         _settingPanel.alpha = 0;
         _settingPanel.blocksRaycasts = true;
         _settingPanel.interactable = true;
@@ -55,46 +65,56 @@ public class SettingPanel : MonoBehaviour
             .SetUpdate(true)
             .OnComplete(() =>
             {
-                _settingPanel.gameObject.SetActive(false);
                 _settingPanel.blocksRaycasts = false;
                 _settingPanel.interactable = false;
             });
     }
 
-    private void ToggleMusic()
-    {
-        _musicOn = !_musicOn;
-        SetMusicVolume(_musicOn ? _musicSlider.value : 0f);
-        UpdateMusicUI();
-    }
-
-    private void SetMusicVolume(float value)
+    private void OnMusicSliderChanged(float value)
     {
         AudioManager.Instance.SetMusicVolume(value);
+
+        if (value <= 0.001f)
+            UpdateMusicUI(true);
+        else
+            UpdateMusicUI(false);
     }
 
-    private void UpdateMusicUI()
+
+    private void OnToggleMusic()
     {
-        _musicOnImg.gameObject.SetActive(_musicOn);
-        _musicOffImg.gameObject.SetActive(!_musicOn);
+        AudioManager.Instance.ToggleMusic();
+        SyncUI();
     }
 
-    private void ToggleSFX()
+    private void UpdateMusicUI(bool muted)
     {
-        _sfxOn = !_sfxOn;
-        SetSFXVolume(_sfxOn ? _sfxSlider.value : 0f);
-        UpdateSFXUI();
+        _musicOnImg.gameObject.SetActive(!muted);
+        _musicOffImg.gameObject.SetActive(muted);
     }
 
-    private void SetSFXVolume(float value)
+    private void OnSFXSliderChanged(float value)
     {
         AudioManager.Instance.SetSFXVolume(value);
+
+        if (value <= 0.001f)
+            UpdateSFXUI(true);
+        else 
+            UpdateSFXUI(false);
     }
-    private void UpdateSFXUI()
+
+    private void OnToggleSFX()
     {
-        _sfxOnImg.gameObject.SetActive(_sfxOn);
-        _sfxOffImg.gameObject.SetActive(!_sfxOn);
+        AudioManager.Instance.ToggleSFX();
+        SyncUI();
     }
+
+    private void UpdateSFXUI(bool muted)
+    {
+        _sfxOnImg.gameObject.SetActive(!muted);
+        _sfxOffImg.gameObject.SetActive(muted);
+    }
+
     public void ExitPanel()
     {
         if (MainMenuController.Instance != null)

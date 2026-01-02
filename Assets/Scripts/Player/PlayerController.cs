@@ -180,6 +180,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     {
         StateMachine.CurrentState.FixedUpdate();
     }
+
     private void InitAttributes()
     {
         _defaultMoveSpeed = _moveSpeed;
@@ -255,7 +256,14 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void OnDestroy()
     {
         WeaponEvents.OnWeaponChanged -= OnGunChanged;
+
+        if (_stats != null)
+            _stats.OnStatsChanged -= ApplyStatsFromStatsSystem;
+
+        if (_levelSystem != null)
+            _levelSystem.OnXPChanged -= HandleXPChanged;
     }
+
     private void OnGunChanged(GunController newGun)
     {
         if (newGun != null && newGun.GunAttributes != null)

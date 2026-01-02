@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private IWinCondition[] _winConditions;
     [SerializeField] private ExitZone _exitZone;
-
+    public bool IsWinConditionMet { get; private set; }
     public bool IsGameOver {  get; private set; }
     public bool IsVictory { get; private set; }
 
@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
     }
     private void Update()
     {
-        if (!IsGameOver)
+        if (!IsGameOver && !IsWinConditionMet)
         {
             _playTime += Time.deltaTime;
 
@@ -64,15 +64,15 @@ public class GameManager : MonoBehaviour
             {
                 if (condition.IsCompleted())
                 {
-                    VictoryGame();
+                    IsWinConditionMet = true;
                     _exitZone.ActivateExitZone();
                     break;
                 }
             }
         }
-
         ResetGame();
     }
+
     private void OnDestroy()
     {
         if (_player != null)
@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
         IsGameOver = true;
         IsVictory = false;
     }
-    private void VictoryGame()
+    public void VictoryGame()
     {
         IsGameOver = true;
         IsVictory = true;
@@ -125,6 +125,12 @@ public class GameManager : MonoBehaviour
         };
 
         UIPopupManager.Instance.ShowWinPanel(ResultData);
+    }
+    public void OnExitZoneCompleted()
+    {
+        if (IsGameOver) return;
+
+        VictoryGame();
     }
     public void AddKill(int amount  = 1)
     {

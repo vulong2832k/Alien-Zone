@@ -39,6 +39,6 @@ public class LoadSlotBtn : MonoBehaviour
     }
     private void OnCreateNew()
     {
-        MainMenuController.Instance.ShowNewGamePanel(_slotId);
+        MainMenuController.Instance.ShowPanel("NewGamePanel");
     }
 }

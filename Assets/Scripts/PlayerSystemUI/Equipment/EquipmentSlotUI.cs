@@ -24,18 +24,11 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     public ItemType AllowedType => _allowedType;
     public ItemSO GetItem() => _slot.item;
 
-    private void Awake()
+    private void OnEnable()
     {
         if (_weaponSwitching == null)
-        {
-            var allSwitchers = FindObjectsByType<WeaponSwitching>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            if (allSwitchers.Length > 0)
-                _weaponSwitching = allSwitchers[0];
-            else
-                Debug.LogError("Không tìm thấy WeaponSwitching trong scene!");
-        }
+            _weaponSwitching = WeaponSwitching.Instance;
     }
-
     private void Start()
     {
         if (_weaponSwitching == null)

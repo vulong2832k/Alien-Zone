@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 public class WeaponSwitching : MonoBehaviour
 {
+    public static WeaponSwitching Instance;
+
     [Header("Gun Setup")]
     [SerializeField] private Transform _gunParent;
     [SerializeField] private SwitchImage _switchImage;
@@ -12,6 +14,11 @@ public class WeaponSwitching : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+
         if (_gunParent == null)
         {
             Transform gunSlots = transform.Find("Head/Gun");
@@ -60,8 +67,6 @@ public class WeaponSwitching : MonoBehaviour
             }
         }
     }
-
-
     private void HandleScrollInput()
     {
         if (_equippedGuns.Count == 0) return;

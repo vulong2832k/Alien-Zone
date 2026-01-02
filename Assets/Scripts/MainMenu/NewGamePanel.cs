@@ -5,25 +5,25 @@ public class NewGamePanel : MonoBehaviour
 {
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private MainMenuController _mainMenuController;
-
-    private string _slotId;
-
-    public void SetSlot(string slotId)
-    {
-        _slotId = slotId;
-    }
-
     public void OnEnterButton()
     {
-        string playerName = nameInput.text.Trim();
+        Debug.Log("ENTER CLICKED");
 
+        string playerName = nameInput.text.Trim();
         if (string.IsNullOrEmpty(playerName))
         {
+            Debug.Log("Name empty");
             return;
         }
 
-        PlayerDataManager.Instance.CreateNewPlayer(_slotId, playerName);
+        string slotId = PlayerDataManager.Instance.GetFirstEmptySlot();
+        if (string.IsNullOrEmpty(slotId))
+        {
+            Debug.Log("All slots are full");
+            return;
+        }
 
+        PlayerDataManager.Instance.CreateNewPlayer(slotId, playerName);
         _mainMenuController.ShowPanel("SelectLevelPanel");
     }
 

@@ -35,15 +35,16 @@ public class UIPopupManager : MonoBehaviour
     }
     public void ShowWinPanel(GameResultData data)
     {
+        Time.timeScale = 0f;
+
         FadeIn(_winPanel);
         CursorManager.Instance.UnlockCursor();
 
         var victoryPanel = _winPanel.GetComponent<VictoryPanel>();
         if (victoryPanel != null)
-        {
             victoryPanel.SetData(data);
-        }
     }
+
     public void ShowSettingPanel()
     {
         FadeIn(_settingPanel);
@@ -62,7 +63,6 @@ public class UIPopupManager : MonoBehaviour
     }
     public void FadeIn(CanvasGroup cg)
     {
-        cg.gameObject.SetActive(true);
         cg.interactable = true;
         cg.blocksRaycasts = true;
 
@@ -78,6 +78,5 @@ public class UIPopupManager : MonoBehaviour
         cg.alpha = alpha;
         cg.interactable = false;
         cg.blocksRaycasts = false;
-        cg.gameObject.SetActive(false);
     }
 }

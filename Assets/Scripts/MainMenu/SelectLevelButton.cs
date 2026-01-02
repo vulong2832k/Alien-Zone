@@ -9,8 +9,9 @@ public class SelectLevelButton : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private Button _selectBtn;
-    [SerializeField] private GameObject _unlockImage;
-    [SerializeField] private GameObject _lockImage;
+    [SerializeField] private Image _stateImage;
+    [SerializeField] private Sprite _lockSprite;
+    [SerializeField] private Sprite _unlockSprite;
     [SerializeField] private TextMeshProUGUI _levelText;
 
     public void Setup(int unlockLevel)
@@ -20,9 +21,7 @@ public class SelectLevelButton : MonoBehaviour
         bool unlocked = _levelIndex <= unlockLevel;
 
         _selectBtn.interactable = unlocked;
-
-        _unlockImage.SetActive(unlocked);
-        _lockImage.SetActive(!unlocked);
+        _stateImage.sprite = unlocked ? _unlockSprite : _lockSprite;
     }
 
     public void OnClick()

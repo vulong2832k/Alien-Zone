@@ -32,11 +32,12 @@ public class LoadingManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        _loadingCanvas.alpha = 0;
-        _loadingCanvas.blocksRaycasts = false;
+        _fadeBlackGroup.alpha = 1f;
+        _fadeBlackGroup.blocksRaycasts = true;
+        _fadeBlackGroup.interactable = true;
 
-        _fadeBlackGroup.alpha = 0;
-        _fadeBlackGroup.blocksRaycasts = false;
+        _loadingCanvas.alpha = 0f;
+        _loadingCanvas.blocksRaycasts = false;
     }
 
 
@@ -54,14 +55,11 @@ public class LoadingManager : MonoBehaviour
         yield return FadeLoading(true);
 
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
-        if (op == null) yield break;
-
         op.allowSceneActivation = false;
 
         while (op.progress < 0.9f)
         {
-            float progress = Mathf.Clamp01(op.progress / 0.9f);
-            UpdateProgress(progress);
+            UpdateProgress(op.progress / 0.9f);
             yield return null;
         }
 
@@ -69,19 +67,12 @@ public class LoadingManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.1f);
 
         op.allowSceneActivation = true;
-
         yield return null;
 
         yield return FadeLoading(false);
-
         yield return FadeBlack(false);
-
-        _loadingCanvas.blocksRaycasts = false;
-        _loadingCanvas.interactable = false;
-
-        _fadeBlackGroup.blocksRaycasts = false;
-        _fadeBlackGroup.interactable = false;
     }
+
     private IEnumerator FadeLoading(bool show)
     {
         float start = _loadingCanvas.alpha;

@@ -113,7 +113,7 @@ public class PlayerStatsUI : MonoBehaviour
     private void RefreshUI()
     {
         _txtAvailablePoints.text =
-            $"Chỉ số có thể cộng: {_levelSystem.availableStatPoints - _pendingUsedPoints}";
+            $"Stats Bonus: {_levelSystem.availableStatPoints - _pendingUsedPoints}";
 
         foreach (var row in _statRows)
         {

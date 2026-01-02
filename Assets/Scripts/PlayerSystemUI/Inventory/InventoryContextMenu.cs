@@ -1,39 +1,36 @@
-﻿using Unity.Cinemachine;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class InventoryContextMenu : MonoBehaviour
 {
-    [SerializeField] private GameObject rightClickMenu;
-    public Button splitBtn;
-    public Button dropBtn;
+    [SerializeField] private CanvasGroup _canvasGroup;
+    [SerializeField] private Button splitBtn;
+    [SerializeField] private Button dropBtn;
 
     private InventorySlotUI _currentSlot;
-    [SerializeField] private Canvas _canvas;
+    private Canvas _canvas;
 
     public static InventoryContextMenu Instance;
 
     private void Awake()
     {
         Instance = this;
-        rightClickMenu.SetActive(false);
+        Hide();
 
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas == null)
-        {
             _canvas = FindAnyObjectByType<Canvas>();
-        }
     }
 
     private void Update()
     {
-        if (rightClickMenu == null) return;
-        // Khi menu đang bật và người chơi click chuột trái
-        if (rightClickMenu.activeSelf && Input.GetMouseButtonDown(0))
+        if (!_canvasGroup.blocksRaycasts) return;
+
+        // Click ra ngoài menu => đóng
+        if (Input.GetMouseButtonDown(0))
         {
-            // Nếu click không nằm trong vùng menu => đóng
             if (!RectTransformUtility.RectangleContainsScreenPoint(
-                rightClickMenu.GetComponent<RectTransform>(),
+                transform as RectTransform,
                 Input.mousePosition,
                 _canvas.worldCamera))
             {
@@ -45,7 +42,6 @@ public class InventoryContextMenu : MonoBehaviour
     public void Show(InventorySlotUI slotUI, Vector3 screenPos)
     {
         _currentSlot = slotUI;
-
         if (_canvas == null) return;
 
         RectTransform canvasRect = _canvas.GetComponent<RectTransform>();
@@ -57,9 +53,12 @@ public class InventoryContextMenu : MonoBehaviour
             out Vector2 localPoint
         );
 
-        rightClickMenu.transform.SetParent(_canvas.transform, false);
-        rightClickMenu.GetComponent<RectTransform>().localPosition = localPoint;
-        rightClickMenu.SetActive(true);
+        transform.SetParent(_canvas.transform, false);
+        (transform as RectTransform).localPosition = localPoint;
+
+        _canvasGroup.alpha = 1f;
+        _canvasGroup.interactable = true;
+        _canvasGroup.blocksRaycasts = true;
 
         splitBtn.onClick.RemoveAllListeners();
         dropBtn.onClick.RemoveAllListeners();
@@ -70,12 +69,16 @@ public class InventoryContextMenu : MonoBehaviour
 
     public void Hide()
     {
-        rightClickMenu.SetActive(false);
+        _currentSlot = null;
+        _canvasGroup.alpha = 0f;
+        _canvasGroup.interactable = false;
+        _canvasGroup.blocksRaycasts = false;
     }
 
     private void SplitStack()
     {
         if (_currentSlot == null) return;
+
         var slot = _currentSlot.GetSlot();
         if (slot == null || slot.IsEmpty || slot.amount < 2) return;
 
@@ -86,6 +89,7 @@ public class InventoryContextMenu : MonoBehaviour
     private void DropItem()
     {
         if (_currentSlot == null) return;
+
         var slot = _currentSlot.GetSlot();
         if (slot == null || slot.IsEmpty) return;
 
@@ -97,11 +101,10 @@ public class InventoryContextMenu : MonoBehaviour
             Transform player = GameObject.FindGameObjectWithTag("Player").transform;
             Vector3 dropPos = player.position + player.forward * 1f;
 
-            GameObject drop = GameObject.Instantiate(item.worldPrefab, dropPos, Quaternion.identity);
+            GameObject drop = Instantiate(item.worldPrefab, dropPos, Quaternion.identity);
 
             var pickup = drop.GetComponent<ItemPickup>();
-            if (pickup == null) return;
-            pickup.Setup(item, amount);
+            pickup?.Setup(item, amount);
         }
 
         slot.Clear();

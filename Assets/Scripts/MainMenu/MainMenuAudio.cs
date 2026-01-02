@@ -4,6 +4,9 @@ public class MainMenuAudio : MonoBehaviour
 {
     private void Start()
     {
-        AudioManager.Instance.PlayMusic(MusicType.MainMenu);
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMusic(MusicType.MainMenu);
+        }
     }
 }
