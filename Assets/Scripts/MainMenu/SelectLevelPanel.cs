@@ -4,7 +4,7 @@ public class SelectLevelPanel : MonoBehaviour
 {
     [SerializeField] private SelectLevelButton[] _levelButtons;
 
-    private void OnEnable()
+    public void OnShow()
     {
         Refresh();
     }

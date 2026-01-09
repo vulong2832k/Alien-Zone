@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0810226248ff0145a48b3376ccb6c46, type: 3}
-  m_Name: Helmet_Level_1
+  m_Name: Helmet_Level_8
   m_EditorClassIdentifier: 
-  itemName: Helmet_Level_1
-  icon: {fileID: 21300000, guid: 07e49176cd9a78d4e8c6af9f466017e0, type: 3}
+  itemName: Helmet_Level_8
+  icon: {fileID: 21300000, guid: 10124dca09903064fbaa0d71493dd331, type: 3}
   itemType: 1
   worldPrefab: {fileID: 0}
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 0}
-  baseHP: 15
-  baseHPRecovery: 2
-  bonusMaxHPRange: {x: 3, y: 5}
-  bonusHPRecoveryRange: {x: 0.5, y: 0.85}
+  baseHP: 500
+  baseHPRecovery: 35
+  bonusMaxHPRange: {x: 100, y: 200}
+  bonusHPRecoveryRange: {x: 25, y: 40}
