@@ -21,8 +21,26 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     private InventorySlot _slot = new InventorySlot();
 
     public bool IsEmpty => _slot.IsEmpty;
-    public ItemType AllowedType => _allowedType;
+    
     public ItemSO GetItem() => _slot.item;
+
+    private ArmorInstance _armorInstance;
+    public ArmorInstance GetArmor()
+    {
+        return _armorInstance;
+    }
+    public bool HasArmor()
+    {
+        return _armorInstance != null;
+    }
+
+    public ItemType AllowedType => _allowedType;
+    public bool IsArmorSlot => _allowedType == ItemType.Armor || _allowedType == ItemType.HeadArmor;
+
+    public bool IsOccupied()
+    {
+        return IsArmorSlot ? _armorInstance != null : !_slot.IsEmpty;
+    }
 
     private void OnEnable()
     {
@@ -50,8 +68,38 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         var fromSlot = draggedSlotUI.GetSlot();
         if (fromSlot == null || fromSlot.IsEmpty) return;
 
+        // ARMOR
+        if (IsArmorSlot)
+        {
+            var sourceItemSO = fromSlot.item;
+            if (sourceItemSO is not ArmorSO armorSO) return;
+            if (armorSO.itemType != _allowedType) return;
+            if (_armorInstance != null) return;
+
+            ArmorInstance newArmor = new ArmorInstance(armorSO);
+
+            if (!EquipmentSystem.Instance.EquipArmor(newArmor))
+                return;
+
+            SetArmor(newArmor);
+
+            fromSlot.amount--;
+            if (fromSlot.amount <= 0)
+                fromSlot.Clear();
+
+            draggedSlotUI.UpdateUI();
+            InventorySystem.Instance.ForceRefresh();
+            return;
+        }
+
+
+
+        //ITEM
         var item = fromSlot.item;
+        if (item == null) return;
         if (item.itemType != _allowedType) return;
+
+        if (_armorInstance != null) return;
 
         int maxAllowed = GetMaxAllowed(item.itemType);
         int canAdd = maxAllowed - _slot.amount;
@@ -63,6 +111,8 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             _slot.AssignItem(item, moveAmount);
         else if (_slot.item == item)
             _slot.amount += moveAmount;
+        else
+            return;
 
         _icon.sprite = item.icon;
         _icon.enabled = true;
@@ -70,37 +120,41 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         fromSlot.amount -= moveAmount;
         if (fromSlot.amount <= 0)
             fromSlot.Clear();
-        draggedSlotUI.UpdateUI();
 
+        draggedSlotUI.UpdateUI();
         UpdateAmountText();
         NotifySlotChanged();
 
         if (_allowedType == ItemType.Weapon && item.gunAttributes != null)
-        {
-            if (_weaponSwitching != null)
-            {
-                GunController newGun = _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
-            }
-        }
+            _weaponSwitching?.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
     }
 
     public void Unequip()
     {
+        if (IsArmorSlot)
+        {
+            if (_armorInstance == null) return;
+
+            InventorySystem.Instance.AddItem((ArmorSO)_armorInstance.itemSO, 1);
+
+            EquipmentSystem.Instance.Unequip(_allowedType);
+            ClearArmor();
+            return;
+        }
+
         if (_slot.IsEmpty) return;
 
-        var inventory = FindAnyObjectByType<InventorySystem>();
-        inventory.AddItem(_slot.item, _slot.amount);
+        InventorySystem.Instance.AddItem(_slot.item, _slot.amount);
 
-        if (_allowedType == ItemType.Weapon && _slot.item.gunAttributes != null && _weaponSwitching != null)
-        {
-            _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, null, false);
-        }
+        if (_allowedType == ItemType.Weapon && _slot.item.gunAttributes != null)
+            _weaponSwitching?.SpawnAndEquipWeapon(_slotIndex, null, false);
 
         _slot.Clear();
         _icon.sprite = _emptySlotSprite;
         UpdateAmountText();
         NotifySlotChanged();
     }
+
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -152,5 +206,26 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             OnSlotChanged?.Invoke(null, 0);
         else
             OnSlotChanged?.Invoke(_slot.item, _slot.amount);
+    }
+    public void SetArmor(ArmorInstance armor)
+    {
+        _armorInstance = armor;
+
+        _icon.sprite = ((ArmorSO)armor.itemSO).icon;
+        _icon.enabled = true;
+
+        _amountText.text = "";
+        NotifySlotChanged();
+    }
+    public void ClearArmor()
+    {
+        _armorInstance = null;
+
+        _slot.Clear();
+        _icon.sprite = _emptySlotSprite;
+        _icon.enabled = true;
+        _amountText.text = "";
+
+        NotifySlotChanged();
     }
 }

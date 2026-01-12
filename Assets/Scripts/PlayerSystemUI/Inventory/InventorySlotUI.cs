@@ -35,20 +35,18 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     }
     public void UpdateUI()
     {
-        if (_slot == null) return;
-
-        if (!_slot.IsEmpty)
-        {
-            _slotImage.sprite = _slot.item.icon;
-            _slotImage.enabled = true;
-            _amountText.text = _slot.amount > 1 ? _slot.amount.ToString() : "";
-        }
-        else
+        if (_slot == null || _slot.IsEmpty)
         {
             _slotImage.sprite = _emptySlotSprite;
-            _slotImage.enabled = true;
             _amountText.text = "";
+            return;
         }
+
+        ItemSO so = _slot.ItemSO;
+        _slotImage.sprite = so.icon;
+        _slotImage.enabled = true;
+
+        _amountText.text = _slot.amount > 1 ? _slot.amount.ToString() : "";
     }
     public void OnClickSlot()
     {
@@ -65,7 +63,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         _dragItemPrefab.SetActive(true);
         _dragItemImage.position = eventData.position;
-        _dragItemImage.GetComponent<Image>().sprite = _slot.item.icon;
+
+        if (_slot.item != null)
+        {
+            _dragItemImage.GetComponent<Image>().sprite = _slot.item.icon;
+        }
 
         _dragItemText.text = _slot.amount > 1 ? _slot.amount.ToString() : "";
 
@@ -123,13 +125,15 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right && _slot != null && !_slot.IsEmpty)
-        {
-            Debug.Log("Right click on slot");
-            InventoryContextMenu.Instance.Show(this, eventData.position);
-        }
-    }
+        if (eventData.button != PointerEventData.InputButton.Right)
+            return;
 
+        if (_slot.item is ArmorSO armorSO)
+        {
+            TryEquipArmor(armorSO);
+        }
+
+    }
     public void OnSplitClicked()
     {
         if (_splitPanel == null)
@@ -142,5 +146,18 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     public InventorySlot GetSlot()
     {
         return _slot;
+    }
+    public void TryEquipArmor(ArmorSO armorSO)
+    {
+        ArmorInstance armorInstance = new ArmorInstance(armorSO);
+
+        bool equipped = EquipmentSystem.Instance.EquipArmor(armorInstance);
+        if (!equipped) return;
+
+        _slot.amount--;
+        if (_slot.amount <= 0)
+            _slot.Clear();
+
+        UpdateUI();
     }
 }

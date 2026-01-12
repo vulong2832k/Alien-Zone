@@ -11,24 +11,15 @@ public class ArmorSO : ItemSO
         public int bonusAmmo;
     }
 
-    [Header("Stats: ")]
+    [Header("Base Stats")]
     public int baseMaxHP;
     public float baseMoveSpeed;
     public int baseSlotItem;
 
-    [Header("Ammo Bonus By Gun Type")]
-    public List<GunAmmoBonus> ammoBonuses;
-
-    public int GetBonusAmmo(GunType gunType)
-    {
-        foreach (var bonus in ammoBonuses)
-        {
-            if (bonus.gunType == gunType || bonus.gunType == GunType.Universal)
-                return bonus.bonusAmmo;
-        }
-        return 0;
-    }
-    [Header("Random Range")]
+    [Header("Random Bonus Range")]
     public Vector2Int bonusMaxHPRange;
     public Vector2 bonusMoveSpeedRange;
+
+    [Header("Ammo Bonus By Gun Type")]
+    public List<GunAmmoBonus> ammoBonuses;
 }

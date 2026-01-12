@@ -2,40 +2,33 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class ArmorInstance
+public class ArmorInstance : ItemInstance
 {
-    public ArmorSO armorSO;
-
-    public int bonusMaxHP;
-    public float bonusMoveSpeed;
+    public int totalMaxHP;
+    public float totalMoveSpeed;
     public int bonusSlotItem;
 
     private Dictionary<GunType, int> ammoBonusMap;
 
+    public override bool IsStackable => false;
+
     public ArmorInstance(ArmorSO so)
     {
-        armorSO = so;
+        itemSO = so;
+        amount = 1;
 
-        bonusMaxHP = Random.Range(
-            so.bonusMaxHPRange.x,
-            so.bonusMaxHPRange.y + 1
-        );
+        int bonusHP = Random.Range(so.bonusMaxHPRange.x, so.bonusMaxHPRange.y + 1);
 
-        bonusMoveSpeed = Random.Range(
-            so.bonusMoveSpeedRange.x,
-            so.bonusMoveSpeedRange.y
-        );
+        float bonusSpeed = Random.Range(so.bonusMoveSpeedRange.x, so.bonusMoveSpeedRange.y);
 
+        totalMaxHP = so.baseMaxHP + bonusHP;
+        totalMoveSpeed = so.baseMoveSpeed + bonusSpeed;
         bonusSlotItem = so.baseSlotItem;
 
         ammoBonusMap = new Dictionary<GunType, int>();
-
         foreach (var bonus in so.ammoBonuses)
         {
-            ammoBonusMap.Add(
-                bonus.gunType,
-                bonus.bonusAmmo
-            );
+            ammoBonusMap[bonus.gunType] = bonus.bonusAmmo;
         }
     }
 

@@ -69,9 +69,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _damage: 0
-  _speed: 40
+  _speed: 80
   lifeTimer: 3
-  _effectHitToWall: {fileID: 1022660981994943411, guid: 9c12b5908ac064744bb0421f33aa663b, type: 3}
+  _poolKey: 
+  _hitEffectKey: HitEffect
+  _bulletType: 0
 --- !u!54 &218918494436358904
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -9,11 +9,24 @@ public enum StatType
 }
 public class PlayerStats : MonoBehaviour
 {
+    public static PlayerStats Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     [Header("Base Stats")]
-    public int maxHPBase = 100;
-    public float damageBonusPercent;
-    public float moveSpeedBonusPercent;
-    public float expBonusPercent;
+    [SerializeField] private int baseMaxHP = 100;
+
+    [Header("Bonus Stats (Equipment / Buff)")]
+    private int bonusMaxHP;
+    private float bonusMoveSpeedPercent;
 
     [Header("Allocated Points")]
     public int hpPoint;
@@ -24,15 +37,20 @@ public class PlayerStats : MonoBehaviour
     public event Action OnStatsChanged;
 
     public int CurrentHP { get; private set; }
-    public int MaxHP => maxHPBase + hpPoint * 5;
+
+    public int MaxHP => baseMaxHP + bonusMaxHP + hpPoint * 5;
+
     public float DamageMultiplier => 1f + strengthPoint * 0.01f;
-    public float MoveSpeedMultiplier => 1f + speedPoint * 0.01f;
+
+    public float MoveSpeedMultiplier => 1f + speedPoint * 0.01f + bonusMoveSpeedPercent;
+
     public float ExpMultiplier => 1f + mindPoint * 0.01f;
 
     private void Start()
     {
         CurrentHP = MaxHP;
     }
+
     public void AddPoint(StatType type)
     {
         switch (type)
@@ -40,15 +58,12 @@ public class PlayerStats : MonoBehaviour
             case StatType.HP:
                 IncreaseHP();
                 break;
-
             case StatType.Strength:
                 strengthPoint++;
                 break;
-
             case StatType.Speed:
                 speedPoint++;
                 break;
-
             case StatType.Mind:
                 mindPoint++;
                 break;
@@ -56,18 +71,37 @@ public class PlayerStats : MonoBehaviour
 
         OnStatsChanged?.Invoke();
     }
+
     private void IncreaseHP()
     {
-        int oldMaxHP = MaxHP;
-
+        int oldMax = MaxHP;
         hpPoint++;
+        int delta = MaxHP - oldMax;
 
-        int newMaxHP = MaxHP;
-        int addedHP = newMaxHP - oldMaxHP;
+        CurrentHP += delta;
+        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
+    }
 
-        CurrentHP += addedHP;
-        CurrentHP = Mathf.Clamp(CurrentHP, 0, newMaxHP);
+    public void RecalculateStats(ArmorInstance body, ArmorInstance head)
+    {
+        bonusMaxHP = 0;
+        bonusMoveSpeedPercent = 0;
+
+        if (body != null)
+        {
+            bonusMaxHP += body.totalMaxHP;
+            bonusMoveSpeedPercent += body.totalMoveSpeed;
+        }
+
+        if (head != null)
+        {
+            
+        }
+
+        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
+        OnStatsChanged?.Invoke();
     }
 }
+
 
 

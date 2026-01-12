@@ -9,8 +9,13 @@ public class InventorySystem : MonoBehaviour
 
     public event Action OnInventoryChanged;
 
+    public static InventorySystem Instance;
+
     private void Awake()
     {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         slots.Clear();
         for (int i = 0; i < _slotCount; i++)
         {
@@ -52,6 +57,22 @@ public class InventorySystem : MonoBehaviour
         }
         OnInventoryChanged?.Invoke();
         return amount;
+    }
+    public bool AddArmor(ArmorInstance armor)
+    {
+        if (armor == null) return false;
+
+        foreach (var slot in slots)
+        {
+            if (slot.IsEmpty)
+            {
+                slot.AssignArmor(armor);
+                OnInventoryChanged?.Invoke();
+                return true;
+            }
+        }
+
+        return false;
     }
     public int GetItemCount(ItemSO item)
     {

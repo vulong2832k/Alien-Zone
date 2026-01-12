@@ -63,7 +63,9 @@ public class ItemPickup : MonoBehaviour
         {
             _isPlayerInRange = inRange;
             if (_renderer != null)
+            {
                 _renderer.material.color = inRange ? Color.green : _originalColor;
+            }
         }
 
         if (_isPlayerInRange && Input.GetKeyDown(pickupKey))
@@ -72,15 +74,20 @@ public class ItemPickup : MonoBehaviour
             {
                 ArmorInstance armorInstance = new ArmorInstance(armorSO);
 
-                EquipmentSystem.Instance.AddArmor(armorInstance);
+                bool added = _playerInventory.AddArmor(armorInstance);
 
-                LootChatUI.Instance?.AddMessage(
-                    $"+ {armorSO.itemName} (HP +{armorInstance.bonusMaxHP})"
-                );
-
-                Destroy(gameObject);
+                if (added)
+                {
+                    LootChatUI.Instance?.AddMessage($"+ {armorSO.itemName} (HP {armorInstance.totalMaxHP}, SPD {armorInstance.totalMoveSpeed:F2})");
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    LootChatUI.Instance?.AddMessage("Inventory !");
+                }
                 return;
             }
+
 
             int remaining = _playerInventory.AddItem(itemData, amount);
             int pickedAmount = amount - Mathf.Max(remaining, 0);
