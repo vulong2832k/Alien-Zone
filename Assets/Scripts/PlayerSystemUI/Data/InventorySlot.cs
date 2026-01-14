@@ -3,40 +3,30 @@ public class InventorySlot
 {
     public ItemSO item;
     public int amount;
-    public ArmorInstance armorInstance;
 
-    public bool IsEmpty => item == null && armorInstance == null;
+    public bool IsEmpty => item == null || amount <= 0;
 
-    public ItemSO ItemSO
-    {
-        get
-        {
-            if (item != null) return item;
-            if (armorInstance != null) return armorInstance.itemSO;
-            return null;
-        }
-    }
-
-    public int Amount => IsEmpty ? 0 : amount;
+    public ItemSO ItemSO => item;
 
     public void AssignItem(ItemSO newItem, int newAmount)
     {
         item = newItem;
         amount = newAmount;
-        armorInstance = null;
     }
-
-    public void AssignArmor(ArmorInstance armor)
+    public bool ReduceItem(int value = 1)
     {
-        armorInstance = armor;
-        item = null;
-        amount = 1;
-    }
+        if (IsEmpty) return false;
 
+        amount -= value;
+
+        if (amount <= 0)
+            Clear();
+
+        return true;
+    }
     public void Clear()
     {
         item = null;
-        armorInstance = null;
         amount = 0;
     }
 }

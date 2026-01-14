@@ -1,15 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using UnityEngine;
 
 public class InventorySystem : MonoBehaviour
 {
-    public List<InventorySlot> slots = new List<InventorySlot>();
-    [SerializeField] private int _slotCount;
+    public static InventorySystem Instance;
+
+    public List<InventorySlot> slots = new();
+    [SerializeField] private int _slotCount = 20;
 
     public event Action OnInventoryChanged;
-
-    public static InventorySystem Instance;
 
     private void Awake()
     {
@@ -18,10 +18,9 @@ public class InventorySystem : MonoBehaviour
 
         slots.Clear();
         for (int i = 0; i < _slotCount; i++)
-        {
             slots.Add(new InventorySlot());
-        }
     }
+
     public int AddItem(ItemSO item, int amount)
     {
         if (item.isStackable)
@@ -30,9 +29,9 @@ public class InventorySystem : MonoBehaviour
             {
                 if (!slot.IsEmpty && slot.item == item && slot.amount < item.maxStack)
                 {
-                    int canAdd = Mathf.Min(amount, item.maxStack - slot.amount);
-                    slot.amount += canAdd;
-                    amount -= canAdd;
+                    int add = Mathf.Min(amount, item.maxStack - slot.amount);
+                    slot.amount += add;
+                    amount -= add;
                     if (amount <= 0)
                     {
                         OnInventoryChanged?.Invoke();
@@ -41,13 +40,14 @@ public class InventorySystem : MonoBehaviour
                 }
             }
         }
+
         foreach (var slot in slots)
         {
             if (slot.IsEmpty)
             {
-                int canAdd = Mathf.Min(amount, item.maxStack);
-                slot.AssignItem(item, canAdd);
-                amount -= canAdd;
+                int add = Mathf.Min(amount, item.maxStack);
+                slot.AssignItem(item, add);
+                amount -= add;
                 if (amount <= 0)
                 {
                     OnInventoryChanged?.Invoke();
@@ -55,64 +55,30 @@ public class InventorySystem : MonoBehaviour
                 }
             }
         }
+
         OnInventoryChanged?.Invoke();
         return amount;
     }
-    public bool AddArmor(ArmorInstance armor)
-    {
-        if (armor == null) return false;
 
-        foreach (var slot in slots)
-        {
-            if (slot.IsEmpty)
-            {
-                slot.AssignArmor(armor);
-                OnInventoryChanged?.Invoke();
-                return true;
-            }
-        }
-
-        return false;
-    }
-    public int GetItemCount(ItemSO item)
-    {
-        int count = 0;
-        foreach (var slot in slots)
-        {
-            if (!slot.IsEmpty && slot.item == item)
-            {
-                count += slot.amount;
-            }
-        }
-        return count;
-    }
     public void RemoveItem(ItemSO item, int amount)
     {
-        for (int i = 0; i < slots.Count; i++)
+        foreach (var slot in slots)
         {
-            var slot = slots[i];
             if (!slot.IsEmpty && slot.item == item)
             {
                 int remove = Mathf.Min(amount, slot.amount);
                 slot.amount -= remove;
                 amount -= remove;
 
-                if (slot.amount <= 0) slot.Clear();
+                if (slot.amount <= 0)
+                    slot.Clear();
 
-                if (amount <= 0) break;
+                if (amount <= 0)
+                    break;
             }
         }
+
         OnInventoryChanged?.Invoke();
-    }
-    public List<InventorySlot> FindSlots(ItemSO item)
-    {
-        List<InventorySlot> result = new List<InventorySlot>();
-        foreach (var slot in slots)
-        {
-            if (!slot.IsEmpty && slot.item == item)
-                result.Add(slot);
-        }
-        return result;
     }
     public void ForceRefresh()
     {

@@ -82,25 +82,39 @@ public class PlayerStats : MonoBehaviour
         CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
     }
 
-    public void RecalculateStats(ArmorInstance body, ArmorInstance head)
+    private void OnEnable()
+    {
+        EquipmentSystem.Instance.OnEquipmentChanged += RecalculateStats;
+    }
+
+    private void OnDisable()
+    {
+        EquipmentSystem.Instance.OnEquipmentChanged -= RecalculateStats;
+    }
+
+    public void RecalculateStats()
     {
         bonusMaxHP = 0;
         bonusMoveSpeedPercent = 0;
 
-        if (body != null)
+        var equip = EquipmentSystem.Instance;
+
+        if (equip.bodyArmor != null)
         {
-            bonusMaxHP += body.totalMaxHP;
-            bonusMoveSpeedPercent += body.totalMoveSpeed;
+            bonusMaxHP += equip.bodyArmor.bonusMaxHP;
+            bonusMoveSpeedPercent += equip.bodyArmor.bonusMoveSpeedPercent;
         }
 
-        if (head != null)
+        if (equip.headArmor != null)
         {
-            
+            bonusMaxHP += equip.headArmor.bonusMaxHP;
+            bonusMoveSpeedPercent += equip.headArmor.bonusMoveSpeedPercent;
         }
 
         CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
         OnStatsChanged?.Invoke();
     }
+
 }
 
 

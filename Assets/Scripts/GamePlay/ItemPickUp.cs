@@ -54,41 +54,27 @@ public class ItemPickup : MonoBehaviour
 
     private void CheckPickup()
     {
-        if (_playerInventory == null || _playerCollider == null) return;
-
-        float distance = Vector3.Distance(transform.position, _playerCollider.ClosestPoint(transform.position));
-        bool inRange = distance <= pickupRange;
-
-        if (inRange != _isPlayerInRange)
-        {
-            _isPlayerInRange = inRange;
-            if (_renderer != null)
-            {
-                _renderer.material.color = inRange ? Color.green : _originalColor;
-            }
-        }
-
         if (_isPlayerInRange && Input.GetKeyDown(pickupKey))
         {
+            // ===== ARMOR =====
             if (itemData is ArmorSO armorSO)
             {
-                ArmorInstance armorInstance = new ArmorInstance(armorSO);
+                int remainingArmor = _playerInventory.AddItem(itemData, 1);
 
-                bool added = _playerInventory.AddArmor(armorInstance);
-
-                if (added)
+                if (remainingArmor <= 0)
                 {
-                    LootChatUI.Instance?.AddMessage($"+ {armorSO.itemName} (HP {armorInstance.totalMaxHP}, SPD {armorInstance.totalMoveSpeed:F2})");
+                    LootChatUI.Instance?.AddMessage($"+ {armorSO.itemName}");
                     Destroy(gameObject);
                 }
                 else
                 {
-                    LootChatUI.Instance?.AddMessage("Inventory !");
+                    LootChatUI.Instance?.AddMessage("Inventory full!");
                 }
-                return;
+
+                return; // QUAN TRỌNG
             }
 
-
+            // ===== ITEM THƯỜNG =====
             int remaining = _playerInventory.AddItem(itemData, amount);
             int pickedAmount = amount - Mathf.Max(remaining, 0);
 
@@ -100,7 +86,6 @@ public class ItemPickup : MonoBehaviour
 
             if (remaining <= 0)
             {
-                // Kiểm tra mission
                 CollectItemsCondition condition = FindAnyObjectByType<CollectItemsCondition>();
                 if (condition != null)
                     condition.AddItem(itemData);

@@ -9,121 +9,89 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     public event Action<ItemSO, int> OnSlotChanged;
 
     [SerializeField] private ItemType _allowedType;
+    public ItemType AllowedType => _allowedType;
     [SerializeField] private Image _icon;
     [SerializeField] private Sprite _emptySlotSprite;
-
     [SerializeField] private TextMeshProUGUI _amountText;
 
-    // Gun
     [SerializeField] private int _slotIndex;
     [SerializeField] private WeaponSwitching _weaponSwitching;
 
-    private InventorySlot _slot = new InventorySlot();
+    private InventorySlot _slot = new();
 
     public bool IsEmpty => _slot.IsEmpty;
-    
     public ItemSO GetItem() => _slot.item;
 
-    private ArmorInstance _armorInstance;
-    public ArmorInstance GetArmor()
-    {
-        return _armorInstance;
-    }
-    public bool HasArmor()
-    {
-        return _armorInstance != null;
-    }
+    
 
-    public ItemType AllowedType => _allowedType;
-    public bool IsArmorSlot => _allowedType == ItemType.Armor || _allowedType == ItemType.HeadArmor;
-
-    public bool IsOccupied()
-    {
-        return IsArmorSlot ? _armorInstance != null : !_slot.IsEmpty;
-    }
+    public bool IsArmorSlot =>
+        _allowedType == ItemType.Armor ||
+        _allowedType == ItemType.HeadArmor;
 
     private void OnEnable()
     {
         if (_weaponSwitching == null)
             _weaponSwitching = WeaponSwitching.Instance;
     }
+
     private void Start()
     {
-        if (_weaponSwitching == null)
-        {
-            var allSwitchers = FindObjectsByType<WeaponSwitching>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            if (allSwitchers.Length > 0)
-                _weaponSwitching = allSwitchers[0];
-        }
-
         _icon.sprite = _emptySlotSprite;
         _icon.enabled = true;
     }
 
     public void OnDrop(PointerEventData eventData)
     {
-        var draggedSlotUI = eventData.pointerDrag?.GetComponent<InventorySlotUI>();
-        if (draggedSlotUI == null) return;
+        var draggedUI = eventData.pointerDrag?.GetComponent<InventorySlotUI>();
+        if (draggedUI == null) return;
 
-        var fromSlot = draggedSlotUI.GetSlot();
-        if (fromSlot == null || fromSlot.IsEmpty) return;
+        var fromSlot = draggedUI._slot;
+        if (fromSlot.IsEmpty) return;
 
-        // ARMOR
+        var item = fromSlot.item;
+        if (item == null || item.itemType != _allowedType) return;
+
+        // ===== ARMOR =====
         if (IsArmorSlot)
         {
-            var sourceItemSO = fromSlot.item;
-            if (sourceItemSO is not ArmorSO armorSO) return;
-            if (armorSO.itemType != _allowedType) return;
-            if (_armorInstance != null) return;
+            var armor = item as ArmorSO;
+            if (armor == null) return;
 
-            ArmorInstance newArmor = new ArmorInstance(armorSO);
+            EquipmentSystem.Instance.Equip(item);
 
-            if (!EquipmentSystem.Instance.EquipArmor(newArmor))
-                return;
-
-            SetArmor(newArmor);
+            _slot.AssignItem(item, 1);
+            _icon.sprite = item.icon;
 
             fromSlot.amount--;
             if (fromSlot.amount <= 0)
                 fromSlot.Clear();
 
-            draggedSlotUI.UpdateUI();
+            draggedUI.UpdateUI();
             InventorySystem.Instance.ForceRefresh();
             return;
         }
-
-
-
-        //ITEM
-        var item = fromSlot.item;
-        if (item == null) return;
-        if (item.itemType != _allowedType) return;
-
-        if (_armorInstance != null) return;
 
         int maxAllowed = GetMaxAllowed(item.itemType);
         int canAdd = maxAllowed - _slot.amount;
         if (canAdd <= 0) return;
 
-        int moveAmount = Mathf.Min(fromSlot.amount, canAdd);
+        int move = Mathf.Min(fromSlot.amount, canAdd);
 
         if (_slot.IsEmpty)
-            _slot.AssignItem(item, moveAmount);
+            _slot.AssignItem(item, move);
         else if (_slot.item == item)
-            _slot.amount += moveAmount;
+            _slot.amount += move;
         else
             return;
 
         _icon.sprite = item.icon;
-        _icon.enabled = true;
 
-        fromSlot.amount -= moveAmount;
+        fromSlot.amount -= move;
         if (fromSlot.amount <= 0)
             fromSlot.Clear();
 
-        draggedSlotUI.UpdateUI();
-        UpdateAmountText();
-        NotifySlotChanged();
+        draggedUI.UpdateUI();
+        UpdateUI();
 
         if (_allowedType == ItemType.Weapon && item.gunAttributes != null)
             _weaponSwitching?.SpawnAndEquipWeapon(_slotIndex, item.gunAttributes, true);
@@ -131,30 +99,28 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
 
     public void Unequip()
     {
-        if (IsArmorSlot)
-        {
-            if (_armorInstance == null) return;
-
-            InventorySystem.Instance.AddItem((ArmorSO)_armorInstance.itemSO, 1);
-
-            EquipmentSystem.Instance.Unequip(_allowedType);
-            ClearArmor();
-            return;
-        }
-
         if (_slot.IsEmpty) return;
 
         InventorySystem.Instance.AddItem(_slot.item, _slot.amount);
 
-        if (_allowedType == ItemType.Weapon && _slot.item.gunAttributes != null)
+        if (IsArmorSlot)
+            EquipmentSystem.Instance.Unequip(_slot.item.equipmentSlot);
+
+        if (_allowedType == ItemType.Weapon)
             _weaponSwitching?.SpawnAndEquipWeapon(_slotIndex, null, false);
 
         _slot.Clear();
-        _icon.sprite = _emptySlotSprite;
-        UpdateAmountText();
-        NotifySlotChanged();
+        UpdateUI();
     }
+    public bool ReduceItem(int value = 1)
+    {
+        if (_slot == null) return false;
 
+        bool result = _slot.ReduceItem(value);
+
+        UpdateUI();
+        return result;
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -162,70 +128,21 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             Unequip();
     }
 
-    private void UpdateAmountText()
+    private void UpdateUI()
     {
-        if (_amountText == null) return;
-
-        _amountText.text = (_slot.IsEmpty || _slot.amount <= 1) ? "" : _slot.amount.ToString();
+        _icon.sprite = _slot.IsEmpty ? _emptySlotSprite : _slot.item.icon;
+        _amountText.text = (_slot.amount > 1) ? _slot.amount.ToString() : "";
+        OnSlotChanged?.Invoke(_slot.item, _slot.amount);
     }
 
-    private int GetMaxAllowed(ItemType type)
+    private int GetMaxAllowed(ItemType type) => type switch
     {
-        return type switch
-        {
-            ItemType.Weapon => 1,
-            ItemType.HeadArmor => 1,
-            ItemType.Armor => 1,
-            ItemType.Medicine => 10,
-            ItemType.Grenade => 15,
-            _ => 20,
-        };
-    }
-
-    public void ReduceItem(int amount)
-    {
-        if (_slot.IsEmpty) return;
-
-        _slot.amount -= amount;
-        if (_slot.amount <= 0)
-        {
-            _slot.Clear();
-            _icon.sprite = _emptySlotSprite;
-
-            if (_allowedType == ItemType.Weapon && _weaponSwitching != null)
-                _weaponSwitching.SpawnAndEquipWeapon(_slotIndex, null, false);
-        }
-
-        UpdateAmountText();
-        NotifySlotChanged();
-    }
-
-    private void NotifySlotChanged()
-    {
-        if (_slot.IsEmpty)
-            OnSlotChanged?.Invoke(null, 0);
-        else
-            OnSlotChanged?.Invoke(_slot.item, _slot.amount);
-    }
-    public void SetArmor(ArmorInstance armor)
-    {
-        _armorInstance = armor;
-
-        _icon.sprite = ((ArmorSO)armor.itemSO).icon;
-        _icon.enabled = true;
-
-        _amountText.text = "";
-        NotifySlotChanged();
-    }
-    public void ClearArmor()
-    {
-        _armorInstance = null;
-
-        _slot.Clear();
-        _icon.sprite = _emptySlotSprite;
-        _icon.enabled = true;
-        _amountText.text = "";
-
-        NotifySlotChanged();
-    }
+        ItemType.Weapon => 1,
+        ItemType.HeadArmor => 1,
+        ItemType.Armor => 1,
+        ItemType.Medicine => 10,
+        ItemType.Grenade => 15,
+        _ => 20
+    };
 }
+

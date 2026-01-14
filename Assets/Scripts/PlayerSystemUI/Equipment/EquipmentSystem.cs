@@ -1,95 +1,78 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EquipmentSystem : MonoBehaviour
 {
     public static EquipmentSystem Instance;
 
-    [SerializeField] private List<EquipmentSlotUI> _slots = new();
-
-    private ArmorInstance _bodyArmor;
-    private ArmorInstance _headArmor;
-
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        Instance = this;
     }
 
-    public EquipmentSlotUI GetSlot(ItemType type)
+    public ArmorSO headArmor;
+    public ArmorSO bodyArmor;
+
+    [Header("Equipment Slots")]
+    [SerializeField] private List<EquipmentSlotUI> _slots = new();
+
+    public event Action OnEquipmentChanged;
+
+    public IReadOnlyList<EquipmentSlotUI> GetAllSlots()
     {
-        return _slots.Find(s => s != null && s.AllowedType == type);
+        return _slots;
     }
-
-    public bool EquipArmor(ArmorInstance armor)
+    public bool Equip(ItemSO item)
     {
-        if (armor == null) return false;
+        if (item == null) return false;
 
-        switch (armor.itemSO.itemType)
+        switch (item.itemType)
         {
             case ItemType.Armor:
-                SwapArmor(ref _bodyArmor, armor);
-                break;
-
             case ItemType.HeadArmor:
-                SwapArmor(ref _headArmor, armor);
-                break;
+                return EquipArmor(item as ArmorSO);
 
             default:
                 return false;
         }
+    }
 
-        ApplyStats();
+    public bool EquipArmor(ArmorSO armor)
+    {
+        if (armor == null) return false;
+
+        switch (armor.equipmentSlot)
+        {
+            case EquipmentSlot.Head:
+                headArmor = armor;
+                break;
+            case EquipmentSlot.Body:
+                bodyArmor = armor;
+                break;
+            default:
+                return false;
+        }
+
+        OnEquipmentChanged?.Invoke();
         return true;
     }
-
-    private void SwapArmor(ref ArmorInstance current, ArmorInstance next)
+    public EquipmentSlotUI GetSlot(ItemType type)
     {
-        if (current != null)
+        foreach (var slot in _slots)
         {
-            InventorySystem.Instance.AddArmor(current);
+            if (slot != null && slot.AllowedType == type)
+                return slot;
         }
-        current = next;
+        return null;
     }
-
-
-    public void Unequip(ItemType type)
+    public void Unequip(EquipmentSlot slot)
     {
-        switch (type)
-        {
-            case ItemType.Armor:
-                ReturnToInventory(ref _bodyArmor);
-                break;
+        if (slot == EquipmentSlot.Head)
+            headArmor = null;
+        else if (slot == EquipmentSlot.Body)
+            bodyArmor = null;
 
-            case ItemType.HeadArmor:
-                ReturnToInventory(ref _headArmor);
-                break;
-        }
-
-        ApplyStats();
-    }
-
-    private void ReturnToInventory(ref ArmorInstance armor)
-    {
-        if (armor == null) return;
-
-        InventorySystem.Instance.AddItem((ArmorSO)armor.itemSO, 1);
-        armor = null;
-    }
-
-
-    public ArmorInstance GetArmor(ItemType type)
-    {
-        return type == ItemType.Armor ? _bodyArmor : _headArmor;
-    }
-
-    public List<EquipmentSlotUI> GetAllSlots()
-    {
-        return _slots;
-    }
-
-    private void ApplyStats()
-    {
-        PlayerStats.Instance.RecalculateStats(_bodyArmor, _headArmor);
+        OnEquipmentChanged?.Invoke();
     }
 }

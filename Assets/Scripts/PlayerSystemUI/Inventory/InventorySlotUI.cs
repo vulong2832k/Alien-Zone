@@ -10,7 +10,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     [SerializeField] private TextMeshProUGUI _amountText;
     [SerializeField] private Sprite _emptySlotSprite;
 
-    private InventorySlot _slot;
+    public InventorySlot _slot;
     private Transform _originalParent;
 
     [Header("Drag: ")]
@@ -132,7 +132,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         {
             TryEquipArmor(armorSO);
         }
-
     }
     public void OnSplitClicked()
     {
@@ -149,9 +148,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     }
     public void TryEquipArmor(ArmorSO armorSO)
     {
-        ArmorInstance armorInstance = new ArmorInstance(armorSO);
-
-        bool equipped = EquipmentSystem.Instance.EquipArmor(armorInstance);
+        bool equipped = EquipmentSystem.Instance.EquipArmor(armorSO);
         if (!equipped) return;
 
         _slot.amount--;
