@@ -14,17 +14,30 @@ public class SplitPanelUI : MonoBehaviour
 
     private void Awake()
     {
+        gameObject.SetActive(true);
+
         Hide();
     }
 
     private void Start()
     {
-        _splitBtn.onClick.AddListener(OnSplit);
-        _cancelBtn.onClick.AddListener(Hide);
+        if (_splitBtn != null)
+            _splitBtn.onClick.AddListener(OnSplit);
+
+        if (_cancelBtn != null)
+            _cancelBtn.onClick.AddListener(Hide);
     }
 
     public void Show(InventorySlotUI slot)
     {
+        if (_canvasGroup == null || _quantityInput == null)
+        {
+            Debug.LogError("SplitPanelUI: Missing UI references!");
+            return;
+        }
+
+        gameObject.SetActive(true);
+
         _currentSlot = slot;
         _quantityInput.text = "";
 
@@ -32,6 +45,12 @@ public class SplitPanelUI : MonoBehaviour
         _canvasGroup.interactable = true;
         _canvasGroup.blocksRaycasts = true;
 
+        StartCoroutine(FocusInputNextFrame());
+    }
+
+    private System.Collections.IEnumerator FocusInputNextFrame()
+    {
+        yield return null;
         _quantityInput.contentType = TMP_InputField.ContentType.IntegerNumber;
         _quantityInput.Select();
         _quantityInput.ActivateInputField();
@@ -40,6 +59,8 @@ public class SplitPanelUI : MonoBehaviour
     private void Hide()
     {
         _currentSlot = null;
+
+        if (_canvasGroup == null) return;
 
         _canvasGroup.alpha = 0f;
         _canvasGroup.interactable = false;
@@ -57,8 +78,7 @@ public class SplitPanelUI : MonoBehaviour
         }
 
         var slot = _currentSlot.GetSlot();
-
-        if (amount <= 0 || amount >= slot.amount)
+        if (slot == null || amount <= 0 || amount >= slot.amount)
         {
             Hide();
             return;
@@ -91,7 +111,7 @@ public class SplitPanelUI : MonoBehaviour
             return;
         }
 
-        empty.AssignItem(slot.item, amount);
+        empty.AssignItem(slot.itemName, amount);
 
         inventory.ForceRefresh();
         _currentSlot.UpdateUI();

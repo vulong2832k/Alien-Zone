@@ -103,7 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: 744455f1a0ba3584d881c8d582b8dbb6, type: 2}
   amount: 1
-  pickupRange: 1
+  pickupRange: 1.5
   pickupKey: 99
   _rotateSpeed: 120
 --- !u!65 &7584447709793979846

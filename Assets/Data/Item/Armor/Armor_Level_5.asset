@@ -12,32 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0799b62930ea3104e89e72a16f9e228c, type: 3}
   m_Name: Armor_Level_5
   m_EditorClassIdentifier: 
+  itemId: 1005
   itemName: Armor_Level_5
   icon: {fileID: 21300000, guid: b72ea6f434129144a8edde7b27d18e04, type: 3}
   itemType: 2
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 4197089184638892543, guid: 9c1c1bd29e4f00a4d932b391f2c0da23, type: 3}
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 0}
-  baseMaxHP: 120
-  baseMoveSpeed: 1.1
-  baseSlotItem: 2
-  ammoBonuses:
-  - gunType: 1
-    bonusAmmo: 4
-  - gunType: 2
-    bonusAmmo: 3
-  - gunType: 3
-    bonusAmmo: 13
-  - gunType: 4
-    bonusAmmo: 1
-  - gunType: 5
-    bonusAmmo: 20
-  - gunType: 6
-    bonusAmmo: 17
-  - gunType: 8
-    bonusAmmo: 1
-  - gunType: 9
-    bonusAmmo: 25
-  bonusMaxHPRange: {x: 15, y: 25}
-  bonusMoveSpeedRange: {x: 0.2, y: 0.6}
+  equipmentSlot: 2
+  bonusMaxHP: 120
+  bonusMoveSpeedPercent: 1.4

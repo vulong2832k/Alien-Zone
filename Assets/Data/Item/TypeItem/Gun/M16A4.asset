@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: M16A4
   m_EditorClassIdentifier: 
+  itemId: 3008
   itemName: M16A4
   icon: {fileID: 21300000, guid: 95d891a36e235b5488155354c65b6e6a, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: 73209e9476ce3254995ac2e1b431549f, type: 2}
+  equipmentSlot: 3

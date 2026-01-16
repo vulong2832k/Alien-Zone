@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+
 public enum StatType
 {
     HP,
@@ -7,6 +8,7 @@ public enum StatType
     Speed,
     Mind
 }
+
 public class PlayerStats : MonoBehaviour
 {
     public static PlayerStats Instance { get; private set; }
@@ -23,10 +25,7 @@ public class PlayerStats : MonoBehaviour
 
     [Header("Base Stats")]
     [SerializeField] private int baseMaxHP = 100;
-
-    [Header("Bonus Stats (Equipment / Buff)")]
-    private int bonusMaxHP;
-    private float bonusMoveSpeedPercent;
+    [SerializeField] private float baseHPRecovery = 0f;
 
     [Header("Allocated Points")]
     public int hpPoint;
@@ -34,15 +33,25 @@ public class PlayerStats : MonoBehaviour
     public int speedPoint;
     public int mindPoint;
 
-    public event Action OnStatsChanged;
+    // ================= BONUS FROM EQUIPMENT =================
+    private int bonusMaxHP;
+    private float bonusMoveSpeedPercent;
+    private float bonusHPRecovery;
 
+    // ================= RUNTIME =================
     public int CurrentHP { get; private set; }
 
+    public event Action OnStatsChanged;
+
+    // ================= CALCULATED =================
     public int MaxHP => baseMaxHP + bonusMaxHP + hpPoint * 5;
+
+    public float HPRecovery => baseHPRecovery + bonusHPRecovery;
 
     public float DamageMultiplier => 1f + strengthPoint * 0.01f;
 
-    public float MoveSpeedMultiplier => 1f + speedPoint * 0.01f + bonusMoveSpeedPercent;
+    public float MoveSpeedMultiplier =>
+        1f + speedPoint * 0.01f + bonusMoveSpeedPercent;
 
     public float ExpMultiplier => 1f + mindPoint * 0.01f;
 
@@ -51,12 +60,34 @@ public class PlayerStats : MonoBehaviour
         CurrentHP = MaxHP;
     }
 
+    private void OnEnable()
+    {
+        if (EquipmentSystem.Instance != null)
+            EquipmentSystem.Instance.OnEquipmentChanged += RecalculateStats;
+    }
+
+    private void OnDisable()
+    {
+        if (EquipmentSystem.Instance != null)
+            EquipmentSystem.Instance.OnEquipmentChanged -= RecalculateStats;
+    }
+    private void Update()
+    {
+        if (HPRecovery <= 0f) return;
+        if (CurrentHP >= MaxHP) return;
+
+        CurrentHP += Mathf.CeilToInt(HPRecovery * Time.deltaTime);
+        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
+    }
+    // ================= POINT =================
     public void AddPoint(StatType type)
     {
+        int oldMaxHP = MaxHP;
+
         switch (type)
         {
             case StatType.HP:
-                IncreaseHP();
+                hpPoint++;
                 break;
             case StatType.Strength:
                 strengthPoint++;
@@ -69,33 +100,22 @@ public class PlayerStats : MonoBehaviour
                 break;
         }
 
+        if (type == StatType.HP)
+        {
+            int delta = MaxHP - oldMaxHP;
+            CurrentHP += delta;
+        }
+
+        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
         OnStatsChanged?.Invoke();
     }
 
-    private void IncreaseHP()
-    {
-        int oldMax = MaxHP;
-        hpPoint++;
-        int delta = MaxHP - oldMax;
-
-        CurrentHP += delta;
-        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
-    }
-
-    private void OnEnable()
-    {
-        EquipmentSystem.Instance.OnEquipmentChanged += RecalculateStats;
-    }
-
-    private void OnDisable()
-    {
-        EquipmentSystem.Instance.OnEquipmentChanged -= RecalculateStats;
-    }
-
+    // ================= EQUIPMENT =================
     public void RecalculateStats()
     {
         bonusMaxHP = 0;
         bonusMoveSpeedPercent = 0;
+        bonusHPRecovery = 0f;
 
         var equip = EquipmentSystem.Instance;
 
@@ -108,14 +128,10 @@ public class PlayerStats : MonoBehaviour
         if (equip.headArmor != null)
         {
             bonusMaxHP += equip.headArmor.bonusMaxHP;
-            bonusMoveSpeedPercent += equip.headArmor.bonusMoveSpeedPercent;
+            bonusHPRecovery += equip.headArmor.baseHPRecovery;
         }
 
         CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
         OnStatsChanged?.Invoke();
     }
-
 }
-
-
-

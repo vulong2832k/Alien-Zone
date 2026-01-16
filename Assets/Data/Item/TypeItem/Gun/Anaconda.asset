@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: Anaconda
   m_EditorClassIdentifier: 
+  itemId: 3002
   itemName: Anaconda
   icon: {fileID: 21300000, guid: 6bd38f91f594e044695f783fcc8d1031, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: 1ac84f0c0e967ba41bbf353c34ffd0e0, type: 2}
+  equipmentSlot: 3

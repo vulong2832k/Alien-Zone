@@ -15,9 +15,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     [SerializeField] private int _maxHP;
     [SerializeField] private int _currentHP;
-    [SerializeField] private float _healRecoveryBasic;
-    [SerializeField] private float _healRecoveryBonus;
-    [SerializeField] private float _healRecoveryTotal;
     public int MaxHP => _maxHP;
     public int CurrentHP => _currentHP;
 
@@ -452,15 +449,20 @@ public class PlayerController : MonoBehaviour, IDamageable
         {
             yield return new WaitForSeconds(5f);
 
-            _healRecoveryTotal = _healRecoveryBasic * (1f + _stats.hpPoint * 0.05f);
-            if (_currentHP < _maxHP && _healRecoveryTotal > 0)
-            {
-                _currentHP += Mathf.RoundToInt(_healRecoveryTotal);
-                _currentHP = Mathf.Clamp(_currentHP, 0, _maxHP);
-                OnHealthChanged?.Invoke(_currentHP, _maxHP);
-            }
+            if (_stats == null) continue;
+
+            float recovery = _stats.HPRecovery;
+            if (recovery <= 0f) continue;
+            if (_currentHP >= _maxHP) continue;
+
+            int healAmount = Mathf.RoundToInt(recovery);
+            _currentHP += healAmount;
+            _currentHP = Mathf.Clamp(_currentHP, 0, _maxHP);
+
+            OnHealthChanged?.Invoke(_currentHP, _maxHP);
         }
     }
+
     #region Gun
     public void AddAmmo(AmmoSO ammo)
     {
@@ -479,21 +481,42 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void TryUseAmmo()
     {
+        if (!IsHoldingGun())
+        {
+            return;
+        }
+
+        GunController currentGun = _weaponSwitching.CurrentGun;
+
+        if (currentGun.GunAttributes == null)
+            return;
+
         var slots = EquipmentSystem.Instance.GetAllSlots();
+        if (slots == null) return;
 
         foreach (var slot in slots)
         {
-            if (slot.AllowedType == ItemType.Ammo && !slot.IsEmpty)
-            {
-                var ammoSO = slot.GetItem() as AmmoSO;
-                if (ammoSO != null)
-                {
-                    AddAmmo(ammoSO);
-                    slot.ReduceItem(1);
-                    break;
-                }
-            }
+            if (slot == null || slot.IsEmpty)
+                continue;
+
+            if (slot.AllowedType != ItemType.Ammo)
+                continue;
+
+            if (slot.GetItem() is not AmmoSO ammoSO)
+                continue;
+
+            AddAmmo(ammoSO);
+
+            slot.ReduceItem(1);
+
+            Debug.Log($"[UseAmmo] Used {ammoSO.name} for gun {currentGun.name}");
+            break;
         }
+    }
+
+    public bool IsHoldingGun()
+    {
+        return _weaponSwitching != null && _weaponSwitching.CurrentGun != null;
     }
     #endregion
     #region UseItem
@@ -510,22 +533,38 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     private void TryUseMedicine()
     {
-        var slots = EquipmentSystem.Instance.GetAllSlots();
+        if (!CanUseMedicine())
+        {
+            return;
+        }
+
+        var slots = EquipmentSystem.Instance?.GetAllSlots();
+        if (slots == null) return;
 
         foreach (var slot in slots)
         {
-            if (slot.AllowedType == ItemType.Medicine && !slot.IsEmpty)
-            {
-                var medicineSO = slot.GetItem() as MedicineSO;
-                if (medicineSO != null)
-                {
-                    UseMedicine(medicineSO, slot);
-                    break;
-                }
-            }
+            if (slot == null || slot.IsEmpty)
+                continue;
+
+            if (slot.AllowedType != ItemType.Medicine)
+                continue;
+
+            if (slot.GetItem() is not MedicineSO medicineSO)
+                continue;
+
+            UseMedicine(medicineSO, slot);
+
+            break;
         }
     }
 
+    private bool CanUseMedicine()
+    {
+        if (_maxHP <= 0) return false;
+
+        float hpPercent = (float)_currentHP / _maxHP;
+        return hpPercent < 0.99f;
+    }
     #endregion
     #region Interactable
     private void OnTriggerEnter(Collider other)

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dfadb12e00045a41bb5fa88a13da2f7, type: 3}
   m_Name: GrenadeMedium
   m_EditorClassIdentifier: 
+  itemId: 4003
   itemName: Grenade Medium
   icon: {fileID: 21300000, guid: 02a620cec2c20e941bfff7e32f65f18a, type: 3}
   itemType: 4
@@ -19,6 +20,7 @@ MonoBehaviour:
   isStackable: 1
   maxStack: 5
   gunAttributes: {fileID: 0}
+  equipmentSlot: 0
   damage: 200
   radius: 7
   grenadeType: 1

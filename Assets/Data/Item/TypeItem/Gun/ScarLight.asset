@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: ScarLight
   m_EditorClassIdentifier: 
+  itemId: 3016
   itemName: ScarLight
   icon: {fileID: 21300000, guid: 64aba36616e52404eb635a357ca647a0, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: 866687556b6c01c418750b4b2ce824e6, type: 2}
+  equipmentSlot: 3

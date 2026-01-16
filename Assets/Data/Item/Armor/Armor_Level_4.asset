@@ -12,33 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0799b62930ea3104e89e72a16f9e228c, type: 3}
   m_Name: Armor_Level_4
   m_EditorClassIdentifier: 
+  itemId: 1004
   itemName: Armor_Level_4
   icon: {fileID: 21300000, guid: 879d6977a9a6c7547afff135adfa9ef4, type: 3}
   itemType: 2
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 8210288317168273256, guid: cc9b1a34874861a4c87b9085954fdfad, type: 3}
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 0}
-  baseMaxHP: 120
-  baseMoveSpeed: 1.1
-  baseSlotItem: 2
-  ammoBonuses:
-  - gunType: 1
-    bonusAmmo: 5
-  - gunType: 2
-    bonusAmmo: 3
-  - gunType: 3
-    bonusAmmo: 10
-  - gunType: 4
-    bonusAmmo: 2
-  - gunType: 5
-    bonusAmmo: 15
-  - gunType: 6
-    bonusAmmo: 16
-  - gunType: 8
-    bonusAmmo: 1
-  - gunType: 9
-    bonusAmmo: 18
-  bonusMaxHPRange: {x: 10, y: 12}
-  bonusCurrentAmmoRange: {x: 0, y: 0}
-  bonusMoveSpeedRange: {x: 0.15, y: 0.45}
+  equipmentSlot: 2
+  bonusMaxHP: 100
+  bonusMoveSpeedPercent: 1

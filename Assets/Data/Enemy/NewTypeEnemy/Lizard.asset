@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Lizard
   m_EditorClassIdentifier: 
   _name: Lizard
-  _maxHP: 275
+  _maxHP: 375
   _damage: 45
   _moveSpeed: 4
-  _attackCooldown: 2.5
-  _attackRange: 5
-  _followRange: 12
-  _typeEnemy: 2
+  _attackCooldown: 2
+  _attackRange: 2.5
+  _followRange: 15
+  _typeEnemy: 1
   _levelEnemy: 0
   _attackStrategy: {fileID: 11400000, guid: 850f27716090c014ea85ae74a37e7d12, type: 2}

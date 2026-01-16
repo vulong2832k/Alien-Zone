@@ -63,7 +63,6 @@ public class PlayerMoveState : PlayerState
             return;
         }
     }
-
     public override void Update()
     {
         _player.PlayerMovement();

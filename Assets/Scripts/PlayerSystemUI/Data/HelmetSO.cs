@@ -10,11 +10,11 @@ public class HelmetSO : ItemSO
         public int bonusDamage;
     }
 
+    [Header("Stats Bonus")]
+    public int bonusMaxHP;
+    public float bonusMoveSpeedPercent;
+
     [Header("Stats: ")]
     public int baseHP;
     public float baseHPRecovery;
-
-    [Header("Random Range")]
-    public Vector2Int bonusMaxHPRange;
-    public Vector2 bonusHPRecoveryRange;
 }

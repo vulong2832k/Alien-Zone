@@ -14,7 +14,7 @@ public class ItemPickup : MonoBehaviour
     [SerializeField] private float _rotateSpeed = 50f;
 
     private InventorySystem _playerInventory;
-    private Collider _playerCollider;
+    private Transform _playerTransform;
     private Renderer _renderer;
     private Color _originalColor;
     private bool _isPlayerInRange;
@@ -34,16 +34,16 @@ public class ItemPickup : MonoBehaviour
 
     private void Start()
     {
-        _playerInventory = SpawnPlayer.PlayerInventory;
-        if (_playerInventory == null)
+        _playerInventory = InventorySystem.Instance;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
         {
-            Debug.LogError("PlayerInventory chưa được gán!");
+            Debug.LogError("Không tìm thấy Player (tag = Player)");
             return;
         }
 
-        _playerCollider = _playerInventory.GetComponentInChildren<Collider>();
-        if (_playerCollider == null)
-            Debug.LogError("PlayerCollider không tìm thấy trong children của PlayerInventory!");
+        _playerTransform = player.transform;
     }
 
     private void Update()
@@ -54,50 +54,38 @@ public class ItemPickup : MonoBehaviour
 
     private void CheckPickup()
     {
-        if (_isPlayerInRange && Input.GetKeyDown(pickupKey))
+        if (_playerTransform == null) return;
+
+        float distance = Vector3.Distance(
+            transform.position,
+            _playerTransform.position
+        );
+
+        if (distance > pickupRange) return;
+
+        if (!Input.GetKeyDown(pickupKey)) return;
+
+        int remaining = _playerInventory.AddItem(itemData, amount);
+        int pickedAmount = amount - Mathf.Max(remaining, 0);
+
+        if (pickedAmount > 0)
         {
-            // ===== ARMOR =====
-            if (itemData is ArmorSO armorSO)
-            {
-                int remainingArmor = _playerInventory.AddItem(itemData, 1);
+            LootChatUI.Instance?.AddMessage($"+ {itemData.itemName} x{pickedAmount}");
+        }
 
-                if (remainingArmor <= 0)
-                {
-                    LootChatUI.Instance?.AddMessage($"+ {armorSO.itemName}");
-                    Destroy(gameObject);
-                }
-                else
-                {
-                    LootChatUI.Instance?.AddMessage("Inventory full!");
-                }
+        if (remaining <= 0)
+        {
+            CollectItemsCondition condition = FindAnyObjectByType<CollectItemsCondition>();
+            condition?.AddItem(itemData);
 
-                return; // QUAN TRỌNG
-            }
-
-            // ===== ITEM THƯỜNG =====
-            int remaining = _playerInventory.AddItem(itemData, amount);
-            int pickedAmount = amount - Mathf.Max(remaining, 0);
-
-            if (pickedAmount > 0 && LootChatUI.Instance != null)
-            {
-                GameManager.Instance?.AddItemLoot(pickedAmount);
-                LootChatUI.Instance.AddMessage($"+ {itemData.itemName} x{pickedAmount}");
-            }
-
-            if (remaining <= 0)
-            {
-                CollectItemsCondition condition = FindAnyObjectByType<CollectItemsCondition>();
-                if (condition != null)
-                    condition.AddItem(itemData);
-
-                Destroy(gameObject);
-            }
-            else
-            {
-                amount = remaining;
-            }
+            Destroy(gameObject);
+        }
+        else
+        {
+            amount = remaining;
         }
     }
+
 
     private void RotateItemPickUp()
     {

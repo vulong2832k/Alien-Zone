@@ -58,27 +58,35 @@ public class PlayerDataManager : MonoBehaviour
         CurrentSlotId = slotId;
         return LoadCurrent();
     }
+
     public void CreateNewPlayer(string slotId, string playerName)
     {
         string key = SLOT_PREFIX + slotId;
-
-        if (PlayerPrefs.HasKey(key))
-        {
-            return;
-        }
+        if (PlayerPrefs.HasKey(key)) return;
 
         CurrentSlotId = slotId;
         CurrentData = new PlayerData
         {
             playerName = playerName,
+
             highestUnlockedMap = 0,
-            currentLevelIndex = 0
+            currentLevelIndex = 0,
+
+            level = 1,
+            exp = 0,
+            expToNextLevel = 100,
+
+            totalKill = 0,
+            playTime = 0,
+
+            inventoryItems = new List<ItemSaveData>(),
+
+            weaponEquippedId = "",
+            armorEquippedId = ""
         };
 
         Save();
     }
-
-
     public void SetCurrentLevel(int levelIndex)
     {
         if (CurrentData == null) return;
@@ -95,7 +103,66 @@ public class PlayerDataManager : MonoBehaviour
         PlayerPrefs.SetString(SLOT_PREFIX + CurrentSlotId, json);
         PlayerPrefs.Save();
     }
+    public void SaveInventory(List<InventorySlot> slots)
+    {
+        if (CurrentData == null) return;
 
+        if (CurrentData.inventoryItems == null)
+            CurrentData.inventoryItems = new List<ItemSaveData>();
+
+        CurrentData.inventoryItems.Clear();
+
+        foreach (var slot in slots)
+        {
+            if (slot.IsEmpty) continue;
+
+            CurrentData.inventoryItems.Add(new ItemSaveData
+            {
+                itemId = slot.itemName.itemId,
+                amount = slot.amount
+            });
+        }
+
+        Save();
+    }
+
+    private void ValidateData()
+    {
+        if (CurrentData.inventoryItems == null)
+            CurrentData.inventoryItems = new List<ItemSaveData>();
+
+        if (CurrentData.level <= 0)
+            CurrentData.level = 1;
+
+        if (CurrentData.expToNextLevel <= 0)
+            CurrentData.expToNextLevel = 100;
+
+        if (CurrentData.weaponEquippedId == null)
+            CurrentData.weaponEquippedId = "";
+
+        if (CurrentData.armorEquippedId == null)
+            CurrentData.armorEquippedId = "";
+    }
+
+    public List<ItemSaveData> GetSavedInventory()
+    {
+        if (CurrentData == null) return new List<ItemSaveData>();
+        if (CurrentData.inventoryItems == null)
+            CurrentData.inventoryItems = new List<ItemSaveData>();
+
+        return CurrentData.inventoryItems;
+    }
+    private bool LoadCurrent()
+    {
+        string key = SLOT_PREFIX + CurrentSlotId;
+        if (!PlayerPrefs.HasKey(key)) return false;
+
+        string json = PlayerPrefs.GetString(key);
+        CurrentData = JsonUtility.FromJson<PlayerData>(json);
+
+        ValidateData();
+        return true;
+    }
     public string GetFirstEmptySlot()
     {
         for (int i = 0; i < MAX_SLOT; i++)
@@ -107,16 +174,6 @@ public class PlayerDataManager : MonoBehaviour
             }
         }
         return null;
-    }
-
-    private bool LoadCurrent()
-    {
-        string key = SLOT_PREFIX + CurrentSlotId;
-        if (!PlayerPrefs.HasKey(key)) return false;
-
-        string json = PlayerPrefs.GetString(key);
-        CurrentData = JsonUtility.FromJson<PlayerData>(json);
-        return true;
     }
     public void ClearAllData()
     {

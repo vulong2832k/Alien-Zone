@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9023602164347597948}
   - component: {fileID: 4367802556737494706}
   - component: {fileID: 5599066123670817978}
+  - component: {fileID: 377686504531998527}
   m_Layer: 0
   m_Name: EnemyBulletMissle
   m_TagString: Untagged
@@ -69,6 +70,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.1, y: 0.1, z: 0.73}
   m_Center: {x: 0, y: 0, z: 0.05}
+--- !u!54 &377686504531998527
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78718997639436174}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!1 &920462911402700884
 GameObject:
   m_ObjectHideFlags: 0

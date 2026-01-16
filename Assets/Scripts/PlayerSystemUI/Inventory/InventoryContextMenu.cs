@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class InventoryContextMenu : MonoBehaviour
 {
+    public static InventoryContextMenu Instance;
+
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private Button splitBtn;
     [SerializeField] private Button dropBtn;
@@ -10,29 +12,32 @@ public class InventoryContextMenu : MonoBehaviour
     private InventorySlotUI _currentSlot;
     private Canvas _canvas;
 
-    public static InventoryContextMenu Instance;
+    private Camera UICamera =>
+        _canvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null
+            : _canvas.worldCamera;
 
     private void Awake()
     {
         Instance = this;
-        Hide();
 
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas == null)
             _canvas = FindAnyObjectByType<Canvas>();
+
+        Hide();
     }
 
     private void Update()
     {
         if (!_canvasGroup.blocksRaycasts) return;
 
-        // Click ra ngoài menu => đóng
         if (Input.GetMouseButtonDown(0))
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(
                 transform as RectTransform,
                 Input.mousePosition,
-                _canvas.worldCamera))
+                UICamera))
             {
                 Hide();
             }
@@ -41,6 +46,8 @@ public class InventoryContextMenu : MonoBehaviour
 
     public void Show(InventorySlotUI slotUI, Vector3 screenPos)
     {
+        gameObject.SetActive(true);
+
         _currentSlot = slotUI;
         if (_canvas == null) return;
 
@@ -49,7 +56,7 @@ public class InventoryContextMenu : MonoBehaviour
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRect,
             screenPos,
-            _canvas.worldCamera,
+            UICamera,
             out Vector2 localPoint
         );
 
@@ -66,6 +73,7 @@ public class InventoryContextMenu : MonoBehaviour
         splitBtn.onClick.AddListener(SplitStack);
         dropBtn.onClick.AddListener(DropItem);
     }
+
 
     public void Hide()
     {
@@ -92,20 +100,6 @@ public class InventoryContextMenu : MonoBehaviour
 
         var slot = _currentSlot.GetSlot();
         if (slot == null || slot.IsEmpty) return;
-
-        ItemSO item = slot.item;
-        int amount = slot.amount;
-
-        if (item != null && item.worldPrefab != null)
-        {
-            Transform player = GameObject.FindGameObjectWithTag("Player").transform;
-            Vector3 dropPos = player.position + player.forward * 1f;
-
-            GameObject drop = Instantiate(item.worldPrefab, dropPos, Quaternion.identity);
-
-            var pickup = drop.GetComponent<ItemPickup>();
-            pickup?.Setup(item, amount);
-        }
 
         slot.Clear();
         _currentSlot.UpdateUI();

@@ -21,6 +21,7 @@ public enum EquipmentSlot
 public class ItemSO : ScriptableObject
 {
     [Header("General Info")]
+    public string itemId;
     public string itemName;
     public Sprite icon;
     public ItemType itemType;

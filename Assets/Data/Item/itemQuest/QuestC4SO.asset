@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d00703128fec3bf4280c63218e3736e7, type: 3}
   m_Name: QuestC4SO
   m_EditorClassIdentifier: 
+  itemId: 0002
   itemName: Quest C4
   icon: {fileID: 21300022, guid: e919f8b19e6260d44b25ce176dd8ee66, type: 3}
   itemType: 6
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 1
   maxStack: 5
   gunAttributes: {fileID: 0}
+  equipmentSlot: 0

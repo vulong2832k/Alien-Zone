@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0810226248ff0145a48b3376ccb6c46, type: 3}
   m_Name: Helmet_Level_1
   m_EditorClassIdentifier: 
+  itemId: 2001
   itemName: Helmet_Level_1
   icon: {fileID: 21300000, guid: 07e49176cd9a78d4e8c6af9f466017e0, type: 3}
   itemType: 1
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 3562011287441476914, guid: 622f5a0167fdb5848960fb914b44b98d, type: 3}
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 0}
+  equipmentSlot: 1
+  bonusMaxHP: 15
+  bonusMoveSpeedPercent: 2
   baseHP: 15
   baseHPRecovery: 2
-  bonusMaxHPRange: {x: 3, y: 5}
-  bonusHPRecoveryRange: {x: 0.5, y: 0.85}

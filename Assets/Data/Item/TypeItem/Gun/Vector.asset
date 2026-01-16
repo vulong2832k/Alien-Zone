@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: Vector
   m_EditorClassIdentifier: 
+  itemId: 3021
   itemName: Vector
   icon: {fileID: 21300000, guid: 761462010393a6f41838f54c01c48ac3, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: 660e9da4699a0e7469310ca617ecba05, type: 2}
+  equipmentSlot: 3

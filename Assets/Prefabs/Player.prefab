@@ -1524,7 +1524,6 @@ GameObject:
   m_Component:
   - component: {fileID: 585225569561656141}
   - component: {fileID: 3206228837820873289}
-  - component: {fileID: 8295466451996331828}
   m_Layer: 6
   m_Name: EXO_Body
   m_TagString: Player
@@ -1715,29 +1714,6 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000000037252903, y: 1.061865, z: 0.1495366}
     m_Extent: {x: 0.033120573, y: 0.006809473, z: 0.003504932}
   m_DirtyAABB: 0
---- !u!136 &8295466451996331828
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758639775057494560}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.29
-  m_Height: 2.8
-  m_Direction: 1
-  m_Center: {x: -0.00000011920929, y: -0.54, z: 0}
 --- !u!1 &1771961079348578085
 GameObject:
   m_ObjectHideFlags: 0
@@ -4882,6 +4858,7 @@ GameObject:
   - component: {fileID: 9071591909220658801}
   - component: {fileID: 6032573319848418986}
   - component: {fileID: 8941307731868202891}
+  - component: {fileID: 1053983096226001049}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -4963,7 +4940,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &5916136809112798134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4995,12 +4972,6 @@ MonoBehaviour:
   _body: {fileID: 585225569561656141}
   _crouchSpeed: 2.5
   _crouchYScale: 0.7
-  _hurtFlash: {fileID: 0}
-  _flashDuration: 0.15
-  _flashAlpha: 0.6
-  _deathFlash: {fileID: 0}
-  _deathFlashDuration: 1.5
-  deathFlashHoldTime: 1.5
   _weaponSlots:
   - {fileID: 916828534975517451}
   - {fileID: 1602910420764679511}
@@ -5090,14 +5061,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b90131f7a4c17f4ca711ae6410ea4a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHPBase: 100
-  damageBonusPercent: 0
-  moveSpeedBonusPercent: 0
-  expBonusPercent: 0
+  baseMaxHP: 100
   hpPoint: 0
   strengthPoint: 0
   speedPoint: 0
   mindPoint: 0
+--- !u!136 &1053983096226001049
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7654408575485792513}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.29
+  m_Height: 2.8
+  m_Direction: 1
+  m_Center: {x: -0.00000011920929, y: 1.34, z: 0}
 --- !u!1 &7792638954255390371
 GameObject:
   m_ObjectHideFlags: 0

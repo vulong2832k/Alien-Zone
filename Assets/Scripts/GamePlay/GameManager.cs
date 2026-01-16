@@ -70,8 +70,13 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        ResetGame();
+
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            ResetGame();
+        }
     }
+
 
     private void OnDestroy()
     {
@@ -85,7 +90,19 @@ public class GameManager : MonoBehaviour
         IsGameOver = true;
         IsVictory = false;
 
+        SaveLoseProgress();
+
         StartCoroutine(DelayLoseUI());
+    }
+    private void SaveLoseProgress()
+    {
+        var dataMgr = PlayerDataManager.Instance;
+        if (dataMgr == null || dataMgr.CurrentData == null) return;
+
+        dataMgr.CurrentData.playTime += _playTime;
+        dataMgr.CurrentData.totalKill += _totalKill;
+
+        dataMgr.Save();
     }
 
     private IEnumerator DelayLoseUI()
@@ -124,8 +141,33 @@ public class GameManager : MonoBehaviour
             totalChestLoot = _totalChestLoot
         };
 
+        SavePlayerProgress();
+
         UIPopupManager.Instance.ShowWinPanel(ResultData);
     }
+    private void SavePlayerProgress()
+    {
+        var dataMgr = PlayerDataManager.Instance;
+        if (dataMgr == null || dataMgr.CurrentData == null) return;
+
+        dataMgr.CurrentData.totalKill += _totalKill;
+        dataMgr.CurrentData.playTime += _playTime;
+
+        int currentLevel = dataMgr.CurrentData.currentLevelIndex;
+        if (currentLevel >= dataMgr.CurrentData.highestUnlockedMap)
+        {
+            dataMgr.CurrentData.highestUnlockedMap = currentLevel + 1;
+        }
+
+        InventorySystem inventory = InventorySystem.Instance;
+        if (inventory != null)
+        {
+            dataMgr.SaveInventory(inventory.GetAllSlots());
+        }
+
+        dataMgr.Save();
+    }
+
     public void OnExitZoneCompleted()
     {
         if (IsGameOver) return;

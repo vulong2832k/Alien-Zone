@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: Tarusk
   m_EditorClassIdentifier: 
+  itemId: 3019
   itemName: Tarusk
   icon: {fileID: 21300000, guid: 20be0e0646f2c4b4f9b883dd38353935, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: a2e5dee3d8799f0418804b58a9f7d166, type: 2}
+  equipmentSlot: 3

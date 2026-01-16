@@ -52,7 +52,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         if (_slot != null && !_slot.IsEmpty)
         {
-            Debug.Log($"Clicked slot: {_slot.item.itemName}, amount: {_slot.amount}");
+            Debug.Log($"Clicked slot: {_slot.itemName.itemName}, amount: {_slot.amount}");
         }
     }
 
@@ -64,9 +64,9 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         _dragItemPrefab.SetActive(true);
         _dragItemImage.position = eventData.position;
 
-        if (_slot.item != null)
+        if (_slot.itemName != null)
         {
-            _dragItemImage.GetComponent<Image>().sprite = _slot.item.icon;
+            _dragItemImage.GetComponent<Image>().sprite = _slot.itemName.icon;
         }
 
         _dragItemText.text = _slot.amount > 1 ? _slot.amount.ToString() : "";
@@ -97,9 +97,9 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         var toSlot = this._slot;
 
         //Item giống nhau + có thể stack được
-        if (!fromSlot.IsEmpty && !toSlot.IsEmpty && fromSlot.item == toSlot.item && fromSlot.item.isStackable)
+        if (!fromSlot.IsEmpty && !toSlot.IsEmpty && fromSlot.itemName == toSlot.itemName && fromSlot.itemName.isStackable)
         {
-            int canMove = Mathf.Min(fromSlot.amount, toSlot.item.maxStack - toSlot.amount);
+            int canMove = Mathf.Min(fromSlot.amount, toSlot.itemName.maxStack - toSlot.amount);
             toSlot.amount += canMove;
             fromSlot.amount -= canMove;
 
@@ -108,16 +108,16 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         //Slot còn trống
         else if (toSlot.IsEmpty && !fromSlot.IsEmpty)
         {
-            toSlot.AssignItem(fromSlot.item, fromSlot.amount);
+            toSlot.AssignItem(fromSlot.itemName, fromSlot.amount);
             fromSlot.Clear();
         }
         //Thay đổi vị trí slot nếu không cùng loại item
         else
         {
-            var tempItem = toSlot.item;
+            var tempItem = toSlot.itemName;
             var tempAmount = toSlot.amount;
 
-            toSlot.AssignItem(fromSlot.item, fromSlot.amount);
+            toSlot.AssignItem(fromSlot.itemName, fromSlot.amount);
             fromSlot.AssignItem(tempItem, tempAmount);
         }
         dragged.UpdateUI(); this.UpdateUI();
@@ -128,11 +128,13 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (eventData.button != PointerEventData.InputButton.Right)
             return;
 
-        if (_slot.item is ArmorSO armorSO)
-        {
-            TryEquipArmor(armorSO);
-        }
+        if (_slot == null || _slot.IsEmpty)
+            return;
+
+        InventoryContextMenu.Instance.Show(this, eventData.position);
     }
+
+
     public void OnSplitClicked()
     {
         if (_splitPanel == null)

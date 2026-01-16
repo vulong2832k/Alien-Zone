@@ -11,7 +11,7 @@ public class EquipmentSystem : MonoBehaviour
         Instance = this;
     }
 
-    public ArmorSO headArmor;
+    public HelmetSO headArmor;
     public ArmorSO bodyArmor;
 
     [Header("Equipment Slots")]
@@ -30,32 +30,42 @@ public class EquipmentSystem : MonoBehaviour
         switch (item.itemType)
         {
             case ItemType.Armor:
+                return EquipArmor(item as ArmorSO, null);
+
             case ItemType.HeadArmor:
-                return EquipArmor(item as ArmorSO);
+                return EquipArmor(null, item as HelmetSO);
 
             default:
                 return false;
         }
     }
+    public bool EquipArmor(ArmorSO armor, HelmetSO helmet)
+    {
+        if (armor != null)
+        {
+            bodyArmor = armor;
+            OnEquipmentChanged?.Invoke();
+            return true;
+        }
+
+        if (helmet != null)
+        {
+            headArmor = helmet;
+            OnEquipmentChanged?.Invoke();
+            return true;
+        }
+
+        return false;
+    }
 
     public bool EquipArmor(ArmorSO armor)
     {
-        if (armor == null) return false;
+        return EquipArmor(armor, null);
+    }
 
-        switch (armor.equipmentSlot)
-        {
-            case EquipmentSlot.Head:
-                headArmor = armor;
-                break;
-            case EquipmentSlot.Body:
-                bodyArmor = armor;
-                break;
-            default:
-                return false;
-        }
-
-        OnEquipmentChanged?.Invoke();
-        return true;
+    public bool EquipHelmet(HelmetSO helmet)
+    {
+        return EquipArmor(null, helmet);
     }
     public EquipmentSlotUI GetSlot(ItemType type)
     {

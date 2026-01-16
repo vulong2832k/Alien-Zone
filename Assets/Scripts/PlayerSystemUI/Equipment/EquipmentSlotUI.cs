@@ -20,7 +20,7 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     private InventorySlot _slot = new();
 
     public bool IsEmpty => _slot.IsEmpty;
-    public ItemSO GetItem() => _slot.item;
+    public ItemSO GetItem() => _slot.itemName;
 
     
 
@@ -48,15 +48,30 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
         var fromSlot = draggedUI._slot;
         if (fromSlot.IsEmpty) return;
 
-        var item = fromSlot.item;
-        if (item == null || item.itemType != _allowedType) return;
+        var item = fromSlot.itemName;
+        if (item == null) return;
+
+        if (IsArmorSlot)
+        {
+            if (_allowedType == ItemType.HeadArmor)
+            {
+                if (item is not HelmetSO) return;
+            }
+            else if (_allowedType == ItemType.Armor)
+            {
+                if (item is not ArmorSO) return;
+            }
+        }
+        else
+        {
+            if (item.itemType != _allowedType)
+                return;
+        }
+
 
         // ===== ARMOR =====
         if (IsArmorSlot)
         {
-            var armor = item as ArmorSO;
-            if (armor == null) return;
-
             EquipmentSystem.Instance.Equip(item);
 
             _slot.AssignItem(item, 1);
@@ -71,6 +86,7 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
             return;
         }
 
+
         int maxAllowed = GetMaxAllowed(item.itemType);
         int canAdd = maxAllowed - _slot.amount;
         if (canAdd <= 0) return;
@@ -79,7 +95,7 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
 
         if (_slot.IsEmpty)
             _slot.AssignItem(item, move);
-        else if (_slot.item == item)
+        else if (_slot.itemName == item)
             _slot.amount += move;
         else
             return;
@@ -101,16 +117,18 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
     {
         if (_slot.IsEmpty) return;
 
-        InventorySystem.Instance.AddItem(_slot.item, _slot.amount);
+        InventorySystem.Instance.AddItem(_slot.itemName, _slot.amount);
 
         if (IsArmorSlot)
-            EquipmentSystem.Instance.Unequip(_slot.item.equipmentSlot);
+            EquipmentSystem.Instance.Unequip(_slot.itemName.equipmentSlot);
 
         if (_allowedType == ItemType.Weapon)
             _weaponSwitching?.SpawnAndEquipWeapon(_slotIndex, null, false);
 
         _slot.Clear();
         UpdateUI();
+
+        InventorySystem.Instance.ForceRefresh();
     }
     public bool ReduceItem(int value = 1)
     {
@@ -130,9 +148,13 @@ public class EquipmentSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
 
     private void UpdateUI()
     {
-        _icon.sprite = _slot.IsEmpty ? _emptySlotSprite : _slot.item.icon;
-        _amountText.text = (_slot.amount > 1) ? _slot.amount.ToString() : "";
-        OnSlotChanged?.Invoke(_slot.item, _slot.amount);
+        if (_icon != null)
+            _icon.sprite = _slot.IsEmpty ? _emptySlotSprite : _slot.itemName.icon;
+
+        if (_amountText != null)
+            _amountText.text = (_slot.amount > 1) ? _slot.amount.ToString() : "";
+
+        OnSlotChanged?.Invoke(_slot.itemName, _slot.amount);
     }
 
     private int GetMaxAllowed(ItemType type) => type switch

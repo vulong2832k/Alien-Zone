@@ -28,7 +28,7 @@ public class PlantZone : MonoBehaviour
     {
         foreach (var slot in inventory.slots)
         {
-            if (!slot.IsEmpty && slot.item == item && slot.amount > 0)
+            if (!slot.IsEmpty && slot.itemName == item && slot.amount > 0)
             {
                 return true;
             }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: Glock 18
   m_EditorClassIdentifier: 
+  itemId: 3006
   itemName: Glock 18
   icon: {fileID: 21300000, guid: 385e8b04e706181408b3531d345eedcd, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: 486ed33d444e96449ad978db66c8efc3, type: 2}
+  equipmentSlot: 3

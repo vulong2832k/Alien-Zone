@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c5aa759f90dbfa4c90dc2c123fb9790, type: 3}
   m_Name: MedicineMedium
   m_EditorClassIdentifier: 
+  itemId: 4006
   itemName: "H\u1ED9p c\u1EE9u th\u01B0\u01A1ng (v\u1EEBa)"
   icon: {fileID: 21300000, guid: 96036945d47b11a4eaf05cf6d8b86b0a, type: 3}
   itemType: 3
@@ -19,5 +20,6 @@ MonoBehaviour:
   isStackable: 1
   maxStack: 5
   gunAttributes: {fileID: 0}
+  equipmentSlot: 0
   recoveryHP: 50
   medicineType: 1

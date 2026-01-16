@@ -12,32 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0799b62930ea3104e89e72a16f9e228c, type: 3}
   m_Name: Armor_Level_6
   m_EditorClassIdentifier: 
+  itemId: 1006
   itemName: Armor_Level_6
   icon: {fileID: 21300000, guid: 8f313b45201b45649b640938d4816afc, type: 3}
   itemType: 2
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 7446523952717599786, guid: ecba5716b3031b94591dc6b408e76bfa, type: 3}
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 0}
-  baseMaxHP: 150
-  baseMoveSpeed: 1.1
-  baseSlotItem: 3
-  ammoBonuses:
-  - gunType: 1
-    bonusAmmo: 6
-  - gunType: 2
-    bonusAmmo: 4
-  - gunType: 3
-    bonusAmmo: 15
-  - gunType: 4
-    bonusAmmo: 2
-  - gunType: 5
-    bonusAmmo: 25
-  - gunType: 6
-    bonusAmmo: 30
-  - gunType: 8
-    bonusAmmo: 1
-  - gunType: 9
-    bonusAmmo: 40
-  bonusMaxHPRange: {x: 25, y: 40}
-  bonusMoveSpeedRange: {x: 0.3, y: 0.6}
+  equipmentSlot: 2
+  bonusMaxHP: 200
+  bonusMoveSpeedPercent: 1.7

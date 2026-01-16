@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1506688413063c7468f7cdf98d1d3935, type: 3}
   m_Name: AUG
   m_EditorClassIdentifier: 
+  itemId: 3003
   itemName: AUG
   icon: {fileID: 21300000, guid: c5a54d24e3f443f4da1ccc130b23a947, type: 3}
   itemType: 0
@@ -19,3 +20,4 @@ MonoBehaviour:
   isStackable: 0
   maxStack: 1
   gunAttributes: {fileID: 11400000, guid: c4d940efaa8206a43aaf2b27eb3801de, type: 2}
+  equipmentSlot: 3
